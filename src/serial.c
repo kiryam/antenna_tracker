@@ -1,9 +1,11 @@
 #include "stm32f10x.h"
+#include "main.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
 #include "assert.h"
 #include "serial.h"
+#include "cli.h"
 
 #define SERIAL_USART USART2
 #define MAX_STRING_LEN 1024
@@ -11,7 +13,20 @@
 
 QueueHandle_t serialRxQueue;
 
+
+#ifdef ENABLE_SERIAL
+	#include "serial.h"
+	void _putchar(char character) {
+		uint8_t tmp[1];
+		tmp[0] = character;
+		serialSendBytes(tmp, 1);
+	}
+
+	#define SERIAL_DEBUG
+#endif
+
 int serialInit() {
+	TRACE_CHECKPOINT("serial init");
 	serialRxQueue = xQueueCreate( MAX_QUEUE_LEN, sizeof( uint16_t ) );
 	if( serialRxQueue == NULL ) {
 		return 1;
@@ -19,8 +34,6 @@ int serialInit() {
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-
-	//GPIO_PinRemapConfig(GPIO_Remap_USART1, DISABLE);
 
 	GPIO_InitTypeDef gpio_port;
 	gpio_port.GPIO_Pin   = GPIO_Pin_3;
@@ -49,13 +62,18 @@ int serialInit() {
 
 	NVIC_InitTypeDef NVIC_InitStructure;
 	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_LOWEST_INTERRUPT_PRIORITY;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
 	NVIC_EnableIRQ(USART2_IRQn);
 
+	if (initCLI() != 0){
+		ERROR("Init cli error");
+		return 1;
+	}
+	TRACE_CHECKPOINT("serial done");
 	return 0;
 }
 

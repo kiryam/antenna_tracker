@@ -120,6 +120,10 @@
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI}&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/mavlink_v2}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/streamports/Jlink_RTT/include}&quot;"/>
                                     								
                                 </option>
                                 								
@@ -168,6 +172,10 @@
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI}&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/mavlink_v2}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/streamports/Jlink_RTT/include}&quot;"/>
                                     								
                                 </option>
                                 								
@@ -216,6 +224,10 @@
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI}&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/mavlink_v2}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/streamports/Jlink_RTT/include}&quot;"/>
                                     								
                                 </option>
                                 								
@@ -428,6 +440,10 @@
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI}&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/mavlink_v2}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/streamports/Jlink_RTT/include}&quot;"/>
                                     								
                                 </option>
                                 								
@@ -458,6 +474,10 @@
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI}&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/mavlink_v2}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/streamports/Jlink_RTT/include}&quot;"/>
                                     								
                                 </option>
                                 								
@@ -488,6 +508,10 @@
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI}&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/mavlink_v2}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/antenna_tracker/FreeRTOS-Plus/TraceRecorder/streamports/Jlink_RTT/include}&quot;"/>
                                     								
                                 </option>
                                 								
@@ -609,13 +633,15 @@
                         						
                         <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI"/>
                         						
+                        <entry excluding="config/|include/|streamports/ARM_ITM/|streamports/File/|streamports/TCPIP/|streamports/TCPIP_Win32/|streamports/USB_CDC/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="FreeRTOS-Plus/TraceRecorder"/>
+                        						
                         <entry excluding="portable/BCC/|portable/CCS/|portable/CodeWarrior/|portable/Common/|portable/IAR/|portable/Keil/|portable/MikroC/|portable/MPLAB/|portable/MSVC-MingW/|portable/oWatcom/|portable/Paradigm/|portable/Renesas/|portable/Rowley/|portable/RVDS/|portable/SDCC/|portable/Softune/|portable/Tasking/|portable/ThirdParty/|portable/WizC/|portable/readme.txt|portable/GCC/ARM_CA53_64_BIT/|portable/GCC/ARM_CA9/|portable/GCC/ARM_CM0/|portable/GCC/ARM_CM3_MPU/|portable/GCC/ARM_CM4_MPU/|portable/GCC/ARM_CM4F/|portable/GCC/ARM_CM7/|portable/GCC/ARM_CR5/|portable/GCC/ARM_CRx_No_GIC/|portable/GCC/ARM7_AT91FR40008/|portable/GCC/ARM7_AT91SAM7S/|portable/GCC/ARM7_LPC2000/|portable/GCC/ARM7_LPC23xx/|portable/GCC/ATMega323/|portable/GCC/AVR32_UC3/|portable/GCC/ColdFire_V2/|portable/GCC/CORTUS_APS3/|portable/GCC/H8S2329/|portable/GCC/HCS12/|portable/GCC/IA32_flat/|portable/GCC/MCF5235/|portable/GCC/MicroBlaze/|portable/GCC/MicroBlazeV8/|portable/GCC/MicroBlazeV9/|portable/GCC/MSP430F449/|portable/GCC/NiosII/|portable/GCC/PPC405_Xilinx/|portable/GCC/PPC440_Xilinx/|portable/GCC/RL78/|portable/GCC/RX100/|portable/GCC/RX600/|portable/GCC/RX600v2/|portable/GCC/STR75x/|portable/GCC/TriCore_1782/|portable/MemMang/heap_1.c|portable/MemMang/heap_3.c|portable/MemMang/heap_5.c|portable/MemMang/heap_2.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="FreeRTOS/Source"/>
                         						
                         <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
                         						
-                        <entry excluding="src/stm32f1-stdperiph/stm32f10x_rtc.c|src/stm32f1-stdperiph/stm32f10x_dbgmcu.c|src/stm32f1-stdperiph/stm32f10x_adc.c|src/stm32f1-stdperiph/stm32f10x_wwdg.c|src/stm32f1-stdperiph/stm32f10x_tim.c|src/stm32f1-stdperiph/stm32f10x_iwdg.c|src/stm32f1-stdperiph/stm32f10x_dma.c|src/stm32f1-stdperiph/stm32f10x_bkp.c|src/stm32f1-stdperiph/stm32f10x_crc.c|src/stm32f1-stdperiph/stm32f10x_dac.c|src/stm32f1-stdperiph/stm32f10x_can.c|src/stm32f1-stdperiph/stm32f10x_spi.c|src/stm32f1-stdperiph/stm32f10x_pwr.c|src/stm32f1-stdperiph/stm32f10x_flash.c|src/stm32f1-stdperiph/stm32f10x_exti.c|src/stm32f1-stdperiph/stm32f10x_sdio.c|src/stm32f1-stdperiph/stm32f10x_fsmc.c|src/stm32f1-stdperiph/stm32f10x_cec.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="system"/>
+                        <entry excluding="src/stm32f1-stdperiph/stm32f10x_rtc.c|src/stm32f1-stdperiph/stm32f10x_dbgmcu.c|src/stm32f1-stdperiph/stm32f10x_adc.c|src/stm32f1-stdperiph/stm32f10x_wwdg.c|src/stm32f1-stdperiph/stm32f10x_iwdg.c|src/stm32f1-stdperiph/stm32f10x_dma.c|src/stm32f1-stdperiph/stm32f10x_bkp.c|src/stm32f1-stdperiph/stm32f10x_crc.c|src/stm32f1-stdperiph/stm32f10x_dac.c|src/stm32f1-stdperiph/stm32f10x_can.c|src/stm32f1-stdperiph/stm32f10x_spi.c|src/stm32f1-stdperiph/stm32f10x_pwr.c|src/stm32f1-stdperiph/stm32f10x_flash.c|src/stm32f1-stdperiph/stm32f10x_sdio.c|src/stm32f1-stdperiph/stm32f10x_fsmc.c|src/stm32f1-stdperiph/stm32f10x_cec.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="system"/>
                         						
-                        <entry excluding="3rdparty/|boards/|demos/|docs/|tools/|.DS_Store|.gitignore|changelog.txt|Doxygenfile|ffconf.h|gfx.mk|gfxconf.example.h|license.html|mf_bwfont.h|mf_rlefont.h|mf_scaledfont.h|pffconf.h|readme.txt|src/gadc/|src/gaudio/|src/gdisp/|src/gdriver/|src/gevent/|src/gfile/|src/ginput/|src/gmisc/|src/gos/|src/gqueue/|src/gtimer/|src/gtrans/|src/gwin/|src/gfx_compilers.h|src/gfx.c|gfx.h|drivers/gadc/|drivers/gaudio/|drivers/ginput/|drivers/multiple/|drivers/gdisp/AlteraFramereader/|drivers/gdisp/ED060SC4/|drivers/gdisp/Fb24bpp/|drivers/gdisp/framebuffer/|drivers/gdisp/HX8347D/|drivers/gdisp/ILI9225/|drivers/gdisp/ILI9320/|drivers/gdisp/ILI9325/|drivers/gdisp/ILI9341/|drivers/gdisp/ILI9342/|drivers/gdisp/ILI93xx/|drivers/gdisp/ILI9481/|drivers/gdisp/ILI9488/|drivers/gdisp/KS0108/|drivers/gdisp/LGDP4532/|drivers/gdisp/Nokia6610GE12/|drivers/gdisp/Nokia6610GE8/|drivers/gdisp/PCD8544/|drivers/gdisp/PCF8812/|drivers/gdisp/QImage/|drivers/gdisp/R61505U/|drivers/gdisp/RA6963/|drivers/gdisp/RA8875/|drivers/gdisp/S6D1121/|drivers/gdisp/SPFD54124B/|drivers/gdisp/SSD1289/|drivers/gdisp/SSD1322/|drivers/gdisp/SSD1331/|drivers/gdisp/SSD1351/|drivers/gdisp/SSD1848/|drivers/gdisp/SSD1963/|drivers/gdisp/SSD2119/|drivers/gdisp/ST7565/|drivers/gdisp/ST7735/|drivers/gdisp/STM32LTDC/|drivers/gdisp/TestStub/|drivers/gdisp/TLS8204/|drivers/gdisp/UC1601s/|drivers/gdisp/UC1610/|drivers/gdisp/UC8173/|drivers/gdisp/readme.txt" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="uGFX"/>
+                        <entry excluding="3rdparty/|boards/|demos/|docs/|tools/|.DS_Store|.gitignore|changelog.txt|Doxygenfile|ffconf.h|gfx.mk|gfxconf.example.h|license.html|mf_bwfont.h|mf_rlefont.h|mf_scaledfont.h|pffconf.h|readme.txt|src/gadc/|src/gaudio/|src/gdisp/|src/gdriver/|src/gevent/|src/gfile/|src/ginput/|src/gmisc/|src/gos/|src/gqueue/|src/gtimer/|src/gtrans/|src/gwin/|src/gfx_compilers.h|src/gfx.c|gfx.h|drivers/gadc/|drivers/gaudio/|drivers/multiple/|drivers/gdisp/AlteraFramereader/|drivers/gdisp/ED060SC4/|drivers/gdisp/Fb24bpp/|drivers/gdisp/framebuffer/|drivers/gdisp/HX8347D/|drivers/gdisp/ILI9225/|drivers/gdisp/ILI9320/|drivers/gdisp/ILI9325/|drivers/gdisp/ILI9341/|drivers/gdisp/ILI9342/|drivers/gdisp/ILI93xx/|drivers/gdisp/ILI9481/|drivers/gdisp/ILI9488/|drivers/gdisp/KS0108/|drivers/gdisp/LGDP4532/|drivers/gdisp/Nokia6610GE12/|drivers/gdisp/Nokia6610GE8/|drivers/gdisp/PCD8544/|drivers/gdisp/PCF8812/|drivers/gdisp/QImage/|drivers/gdisp/R61505U/|drivers/gdisp/RA6963/|drivers/gdisp/RA8875/|drivers/gdisp/S6D1121/|drivers/gdisp/SPFD54124B/|drivers/gdisp/SSD1289/|drivers/gdisp/SSD1322/|drivers/gdisp/SSD1331/|drivers/gdisp/SSD1351/|drivers/gdisp/SSD1848/|drivers/gdisp/SSD1963/|drivers/gdisp/SSD2119/|drivers/gdisp/ST7565/|drivers/gdisp/ST7735/|drivers/gdisp/STM32LTDC/|drivers/gdisp/TestStub/|drivers/gdisp/TLS8204/|drivers/gdisp/UC1601s/|drivers/gdisp/UC1610/|drivers/gdisp/UC8173/|drivers/gdisp/readme.txt|drivers/ginput/dial/|drivers/ginput/touch/|drivers/ginput/toggle/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="uGFX"/>
                         					
                     </sourceEntries>
                     				

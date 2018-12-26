@@ -3,6 +3,7 @@
 
 #include <board_SSD1306.h>
 #include "stdint.h"
+#include "main.h"
 #include "stm32f10x.h"
 
 //#define SSD1306_PAGE_PREFIX		0x40			 		// Co = 0, D/C = 1
@@ -22,13 +23,13 @@ static GFXINLINE void init_board(GDisplay *g) {
 	g->board = 0;
 	switch(g->controllerdisplay) {
 	case 0:
-		I2C_DeInit(SSD1306_I2C);
-		GPIO_InitTypeDef gpio;
-		I2C_InitTypeDef i2c;
-		GPIO_StructInit(&gpio);
-		I2C_StructInit(&i2c);
+		//I2C_DeInit(SSD1306_I2C);
+		//GPIO_InitTypeDef gpio;
+		//I2C_InitTypeDef i2c;
+		//GPIO_StructInit(&gpio);
+		//I2C_StructInit(&i2c);
 
-		gpio.GPIO_Pin = SSD1306_SDA_PIN | SSD1306_SCL_PIN;
+		/*gpio.GPIO_Pin = SSD1306_SDA_PIN | SSD1306_SCL_PIN;
 		gpio.GPIO_Mode = GPIO_Mode_AF_OD;
 		gpio.GPIO_Speed = GPIO_Speed_50MHz;
 		GPIO_Init(GPIOB, &gpio);
@@ -40,8 +41,10 @@ static GFXINLINE void init_board(GDisplay *g) {
 		i2c.I2C_Ack = I2C_Ack_Disable;
 		i2c.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 		I2C_Init(SSD1306_I2C, &i2c);
-		I2C_Cmd(SSD1306_I2C, ENABLE);
+		I2C_Cmd(SSD1306_I2C, ENABLE);*/
+
 		break;
+
 	}
 }
 
@@ -54,10 +57,14 @@ static GFXINLINE void setpin_reset(GDisplay *g, bool_t state) {
 }
 
 static GFXINLINE void acquire_bus(GDisplay *g) {
+	xSemaphoreTake( I2C_mtx, portMAX_DELAY );
+
+
 	(void) g;
 }
 
 static GFXINLINE void release_bus(GDisplay *g) {
+	xSemaphoreGive( I2C_mtx);
 	(void) g;
 }
 

@@ -1,22 +1,104 @@
+#include "main.h"
 #include "gui.h"
 #include "FreeRTOS.h"
 #include "timers.h"
 #include "stdbool.h"
 #include "gfx.h"
 #include "telemetry.h"
+#include "gps.h"
+#include "tracking.h"
+#include "controls.h"
+#include "stepper.h"
+
 
 static GHandle ghContainerTelemetry, ghTelemetryRxGood, ghTelemetryRxBad, ghTelemetryPosLat, ghTelemetryPosLon;
+static GHandle ghContainerGPS, ghGPSLon, ghGPSLat, ghGPSAlt, ghHomeBearing;
 static GHandle ghContainerSystem, ghSystemHeapFree;
+static GHandle ghContainerServo, ghServoBearing, ghServoElevation, ghServoDist;
+static GHandle ghContainerServoTuning, ghServoBearingTuning;
+static GHandle ghContainerHomeFinder, ghHomeFinderCompass;
 static GWidgetInit wi;
 static font_t  font;
+static int16_t last_encoder_value;
+static bool firstTimeRendered;
+static enum activeRenderer last_renderer;
+static void vUIRenderTimerCallback(TimerHandle_t pxTimer);
+TimerHandle_t guiTimer = NULL;
 
-typedef uint8_t SCREEN;
-static const SCREEN SCREEN_TELEMETRY = 1;
-static const SCREEN SCREEN_SYSTEM = 2;
-static SCREEN active_screen;
+enum activeRenderer renderer;
+
+static enum screen_type {
+	SCREEN_TELEMETRY,
+	SCREEN_SYSTEM,
+	SCREEN_GPS,
+	SCREEN_SERVO,
+
+	SCREEN_ENUM_LEN
+} active_screen;
+
 TimerHandle_t screen_switch_timer;
-static SCREEN screen_sequence[2];
+static uint8_t screen_sequence[SCREEN_ENUM_LEN];
 static uint8_t screen_i=0;
+static char tmp[32] ={0};
+
+#define SCREEN_SWITCH_TIMEOUT 3000
+
+void UIInitTask(void* pvParameters) {
+    (void)pvParameters;
+    gfxInit();
+    font = gdispOpenFont("UI2");
+	gwinSetDefaultFont(font);
+
+	screen_sequence[0] = SCREEN_SYSTEM;
+	screen_sequence[1] = SCREEN_GPS;
+	screen_sequence[2] = SCREEN_TELEMETRY;
+	screen_sequence[3] = SCREEN_SERVO;
+
+	screen_i= 3;
+	active_screen = screen_sequence[screen_i];
+
+ 	guiTimer = xTimerCreate( "guiTimer", 100, pdTRUE,0, vUIRenderTimerCallback);
+	if (guiTimer == NULL) {
+		ERROR("Failed to create guiTimer");
+	}
+
+	if ( xTimerStart(guiTimer,  ( TickType_t ) 10) == pdFAIL ) {
+		ERROR("Failed to start guiTimer");
+	}
+
+    vTaskDelete(NULL);
+}
+
+void vUIRenderTimerCallback(TimerHandle_t pxTimer){
+	(void) pxTimer;
+
+	if(renderer != last_renderer) {
+		firstTimeRendered = false;
+		last_renderer = renderer;
+	}
+	switch(renderer){
+		case RENDER_INFO:
+			InfoScreenRender();
+			break;
+		case RENDER_SERVO_TUNING:
+			ServoTuningScreenRender();
+			break;
+
+		case RENDER_HOME_FINDING:
+			HomeFinderRender();
+			break;
+	}
+}
+
+void UIDestroyContainerWithChilds(GHandle gh){
+	if (gh == NULL) return;
+
+	GHandle	child;
+	while((child = gwinGetFirstChild(gh))){
+		gwinDestroy(child);
+	}
+	gwinDestroy(gh);
+}
 
 void UITelemetryScreen(){
 	gwinWidgetClearInit(&wi);
@@ -90,28 +172,136 @@ void UISystemInfoScreen(){
 	gwinLabelSetAttribute(ghSystemHeapFree, 60, "HeapFree:");
 }
 
-void vTimerScreenSwitch( TimerHandle_t xTimer ) {
-	(void) xTimer;
-	if ( screen_i++ > sizeof(screen_sequence) ){
-		screen_i = 0;
-	}
-	active_screen = screen_sequence[screen_i];
+void UIGPSInfoScreen() {
+	gwinWidgetClearInit(&wi);
+	wi.customDraw = 0;
+	wi.customParam = 0;
+	wi.customStyle = 0;
+
+	wi.g.show = TRUE;
+	wi.g.width = 126;
+	wi.g.height = 64;
+	wi.g.y = 0;
+	wi.g.x = 0;
+	ghContainerGPS = gwinContainerCreate(0, &wi, GWIN_CONTAINER_BORDER);
+	wi.g.show = TRUE;
+	wi.g.parent = ghContainerGPS;
+	wi.g.width = gwinGetInnerWidth(ghContainerGPS);
+
+	wi.g.y = 12;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghGPSLat = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghGPSLat, 50, "Lat:");
+
+	wi.g.y = 24;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghGPSLon = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghGPSLon, 50, "Lon:");
+
+	wi.g.y = 36;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghGPSAlt = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghGPSAlt, 50, "Alt:");
+
+	wi.g.y = 48;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghHomeBearing = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghHomeBearing, 50, "Bearing:");
 }
 
-void UICreate(){
-	UITelemetryScreen();
-	UISystemInfoScreen();
+void UIServoScreen(){
+	gwinWidgetClearInit(&wi);
+	wi.customDraw = 0;
+	wi.customParam = 0;
+	wi.customStyle = 0;
 
-	active_screen = SCREEN_TELEMETRY;
-	screen_sequence[0] = SCREEN_SYSTEM;
-	screen_sequence[1] = SCREEN_TELEMETRY;
+	wi.g.show = TRUE;
+	wi.g.width = 126;
+	wi.g.height = 64;
+	wi.g.y = 0;
+	wi.g.x = 0;
+	ghContainerServo = gwinContainerCreate(0, &wi, GWIN_CONTAINER_BORDER);
+	wi.g.show = TRUE;
+	wi.g.parent = ghContainerServo;
+	wi.g.width = gwinGetInnerWidth(ghContainerServo);
 
-	screen_switch_timer = xTimerCreate ("ScreenSwitchTimer", 1000, pdTRUE, ( void * ) 0, vTimerScreenSwitch);
-	xTimerStart( screen_switch_timer, 0);
+	wi.g.y = 0;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghServoBearing = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghServoBearing, 70, "Bearing:");
 
-	/*gdispDrawCircle(20, 40, 10, White);*/
+	wi.g.y = 12;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghServoElevation = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghServoElevation, 70, "Elevation:");
+
+	wi.g.y = 24;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghServoDist = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghServoDist, 70, "Distantion:");
 }
 
+void UIServoTuningScreen(){
+	gwinWidgetClearInit(&wi);
+	wi.customDraw = 0;
+	wi.customParam = 0;
+	wi.customStyle = 0;
+
+	wi.g.show = TRUE;
+	wi.g.width = 126;
+	wi.g.height = 64;
+	wi.g.y = 0;
+	wi.g.x = 0;
+	ghContainerServoTuning = gwinContainerCreate(0, &wi, GWIN_CONTAINER_BORDER);
+	wi.g.show = TRUE;
+	wi.g.parent = ghContainerServoTuning;
+	wi.g.width = gwinGetInnerWidth(ghContainerServoTuning);
+
+	wi.g.y = 0;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghServoBearingTuning = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghServoBearingTuning, 60, "BTuning:");
+}
+
+void UIHomeFinerScreen(){
+	gwinWidgetClearInit(&wi);
+	wi.customDraw = 0;
+	wi.customParam = 0;
+	wi.customStyle = 0;
+
+	wi.g.show = TRUE;
+	wi.g.width = 126;
+	wi.g.height = 64;
+	wi.g.y = 0;
+	wi.g.x = 0;
+	ghContainerHomeFinder = gwinContainerCreate(0, &wi, GWIN_CONTAINER_BORDER);
+	wi.g.show = TRUE;
+	wi.g.parent = ghContainerHomeFinder;
+	wi.g.width = gwinGetInnerWidth(ghContainerHomeFinder);
+
+	wi.g.y = 0;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghHomeFinderCompass = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghHomeFinderCompass, 60, "Heading:");
+}
 
 void lat_to_char( int32_t degE7, char* buf ){
   // Extract and print negative sign
@@ -152,39 +342,134 @@ void lat_to_char( int32_t degE7, char* buf ){
 	  buf[pos++] = tmp[i++];
 	}
 }
-void UIRenderTask(void * argunment){
-	(void) argunment;
 
-	gfxInit();
+void cleanScreen(){
+	UIDestroyContainerWithChilds(ghContainerSystem);
+	UIDestroyContainerWithChilds(ghContainerGPS);
+	UIDestroyContainerWithChilds(ghContainerTelemetry);
+	UIDestroyContainerWithChilds(ghContainerServo);
+	UIDestroyContainerWithChilds(ghContainerServoTuning);
+}
 
-	font = gdispOpenFont("UI2");
-	gwinSetDefaultFont(font);
-
-	UICreate();
-	while(1) {
-		char tmp[64] ={0};
-		if (active_screen == SCREEN_TELEMETRY ){
-			gwinHide(ghContainerSystem);
-			gwinShow(ghContainerTelemetry);
-
-			itoa(telemetry.rx_good, tmp, 10);
-			gwinSetText(ghTelemetryRxGood, tmp, TRUE);
-
-			itoa(telemetry.rx_bad, tmp, 10);
-			gwinSetText(ghTelemetryRxBad, tmp, TRUE);
-
-			lat_to_char(telemetry.current_messages.global_position_int.lat, tmp);
-			gwinSetText(ghTelemetryPosLat, tmp, TRUE);
-
-			lat_to_char(telemetry.current_messages.global_position_int.lon, tmp);
-			gwinSetText(ghTelemetryPosLon, tmp, TRUE);
-		} else if (active_screen == SCREEN_SYSTEM ){
-			gwinHide(ghContainerTelemetry);
-			gwinShow(ghContainerSystem);
-
-			itoa(xPortGetFreeHeapSize(), tmp, 10);
-			gwinSetText(ghSystemHeapFree, tmp, TRUE);
+void switchScreen(bool forward){
+	if ( forward ) {
+		screen_i++;
+		if ( screen_i >= sizeof(screen_sequence) ){
+			screen_i = 0;
 		}
-		gfxSleepMilliseconds(100);
+	}else{
+		screen_i--;
+		if ( screen_i >= sizeof(screen_sequence) ){
+			screen_i = sizeof(screen_sequence)-1;
+		}
 	}
+	//last_encoder_value = encoder_value;
+
+	cleanScreen();
+	active_screen = screen_sequence[screen_i];
+	if (active_screen == SCREEN_TELEMETRY ){
+		UITelemetryScreen();
+	}else if (active_screen == SCREEN_SYSTEM ){
+		UISystemInfoScreen();
+	}else if (active_screen == SCREEN_GPS){
+		UIGPSInfoScreen();
+	}else if (active_screen == SCREEN_SERVO){
+		UIServoScreen();
+	}
+}
+
+#define INTCACHE_SIZE 4
+int32_t intCache[INTCACHE_SIZE];
+
+void gwinSetIntCached(uint16_t cache_bank, GHandle gh, int32_t value, bool_t useAlloc){
+	if (intCache[cache_bank] == value ){
+		return;
+	}
+	intCache[cache_bank] = value;
+	itoa(value, tmp, 10);
+	gwinSetText(gh, tmp, useAlloc);
+}
+
+void gwinSetDegE7Cached(uint16_t cache_bank, GHandle gh, int32_t value, bool_t useAlloc){
+	if (intCache[cache_bank] == value ){
+		return;
+	}
+	intCache[cache_bank] = value;
+	lat_to_char(value, tmp);
+	gwinSetText(gh, tmp, useAlloc);
+}
+
+void InfoScreenRender(){
+	if( firstTimeRendered == false ){ // just create screen
+		switchScreen(true);
+		firstTimeRendered = true;
+	}
+
+	if( btn2 ){
+		btn2 = false;
+		renderer = RENDER_SERVO_TUNING;
+		cleanScreen();
+		UIServoTuningScreen();
+		return;
+	}
+
+	if (btn1 ){
+		switchScreen(true);
+		//last_encoder_value = encoder_value;
+		btn1 = false;
+	}
+
+	if (active_screen == SCREEN_TELEMETRY ){
+		gwinSetIntCached(0, ghTelemetryRxGood, telemetry.rx_good, TRUE);
+		gwinSetIntCached(1, ghTelemetryRxBad, telemetry.rx_bad, TRUE);
+		gwinSetDegE7Cached(2, ghTelemetryPosLat, telemetry.current_messages.gps_raw_int.lat, TRUE);
+		gwinSetDegE7Cached(3, ghTelemetryPosLon, telemetry.current_messages.gps_raw_int.lon, TRUE);
+	} else if (active_screen == SCREEN_SYSTEM ){
+		gwinSetIntCached(0, ghSystemHeapFree, xPortGetFreeHeapSize(), TRUE);
+	} else if (active_screen == SCREEN_SYSTEM ){
+		gwinSetIntCached(0,ghSystemHeapFree, xPortGetFreeHeapSize(), TRUE);
+	} else if (active_screen == SCREEN_GPS ){
+		gwinSetDegE7Cached(0, ghGPSLat, gps.lat, TRUE);
+		gwinSetDegE7Cached(1, ghGPSLon, gps.lon, TRUE);
+		gwinSetIntCached(2, ghGPSAlt, gps.alt, TRUE);
+		gwinSetIntCached(3, ghHomeBearing, home_bearing, TRUE);
+	} else if (active_screen == SCREEN_SERVO) {
+		gwinSetIntCached(0, ghServoBearing, Bearing, TRUE);
+		gwinSetIntCached(1, ghServoElevation, Elevation, TRUE);
+		gwinSetIntCached(2, ghServoDist, home_dist, TRUE);
+	}
+}
+
+void ServoTuningScreenRender(){
+	if( btn2 ){
+		btn2 = false;
+		renderer = RENDER_INFO;
+		switchScreen(encoder_value);
+		return;
+	}
+
+	if ( encoder_value != last_encoder_value ){
+		if (encoder_value > last_encoder_value) {
+			if( BearingTuning < 90 ){
+				BearingTuning = BearingTuning + STEPPER_MIN_ANGILE;
+			}
+		} else {
+			if (BearingTuning > -90 ) {
+				BearingTuning = BearingTuning - STEPPER_MIN_ANGILE;
+			}
+		}
+
+		last_encoder_value = encoder_value;
+	}
+	snprintf(tmp, 10, "%f", BearingTuning);
+	gwinSetText(ghServoBearingTuning, tmp, TRUE);
+}
+
+void HomeFinderRender(){
+	if( firstTimeRendered == false ){ // just create screen
+		UIHomeFinerScreen();
+		firstTimeRendered = true;
+	}
+
+	gwinSetIntCached(0, ghHomeFinderCompass, home_bearing, TRUE);
 }

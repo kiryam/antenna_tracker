@@ -1,4 +1,14 @@
 #pragma once
 
-void initCLI();
-void vCommandConsoleTask( void *pvParameters );
+#include "FreeRTOS.h"
+#include "timers.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	int initCLI();
+
+#ifdef __cplusplus
+}
+#endif

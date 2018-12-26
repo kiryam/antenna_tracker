@@ -26,6 +26,8 @@ typedef struct __Mavlink_Messages {
 	// Global Position
 	mavlink_global_position_int_t global_position_int;
 
+	mavlink_gps_raw_int_t gps_raw_int;
+
 	// Local Position Target
 //	mavlink_position_target_local_ned_t position_target_local_ned;
 
@@ -52,15 +54,28 @@ typedef struct __Mavlink_Messages {
 
 } Mavlink_Messages;
 
-
+#define TELEMETRY_UNKNOWN 0
+#define TELEMETRY_OK 1
+#define TELEMETRY_BAD 2
 
 typedef struct __TELEMENTRY_STATS {
 	uint32_t rx_good;
 	uint32_t rx_bad;
 	Mavlink_Messages current_messages;
+	uint8_t status;
 } TelemetryStats;
 
 extern TelemetryStats telemetry;
 
 
-int InitTelemetry();
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	int InitTelemetry();
+	void processTelemetry();
+
+#ifdef __cplusplus
+}
+#endif
+
