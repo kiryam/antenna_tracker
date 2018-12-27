@@ -49,9 +49,9 @@ void UIInitTask(void* pvParameters) {
     font = gdispOpenFont("UI2");
 	gwinSetDefaultFont(font);
 
-	screen_sequence[0] = SCREEN_SYSTEM;
+	screen_sequence[0] = SCREEN_TELEMETRY;
 	screen_sequence[1] = SCREEN_GPS;
-	screen_sequence[2] = SCREEN_TELEMETRY;
+	screen_sequence[2] = SCREEN_SYSTEM;
 	screen_sequence[3] = SCREEN_SERVO;
 
 	screen_i= 3;

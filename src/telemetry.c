@@ -10,7 +10,7 @@
 
 //#define DEBUG_MAVLINK
 #define TELEMETRY_USART USART1
-#define TELEMETRY_QUEUE_LEN 16
+#define TELEMETRY_QUEUE_LEN 512
 
 static QueueHandle_t telemetryRxQueue;
 static mavlink_status_t lastStatus;
@@ -108,7 +108,8 @@ void USART1_IRQHandler(){
 static mavlink_status_t status;
 
 void vTelemetryTimerCallback(TimerHandle_t pxTimer) {
-	while( xQueueReceive( telemetryRxQueue, &( cRxedChar ), ( TickType_t ) 10 ) ) {
+	(void)pxTimer;
+	while( xQueueReceive( telemetryRxQueue, &( cRxedChar ), ( TickType_t ) 1 ) ) {
 		msgReceived = mavlink_parse_char(MAVLINK_COMM_0, cRxedChar, &message, &status);
 
 		if ( (lastStatus.packet_rx_drop_count != status.packet_rx_drop_count) ) {
@@ -118,7 +119,6 @@ void vTelemetryTimerCallback(TimerHandle_t pxTimer) {
 
 		if(msgReceived) {
 			telemetry.rx_good++;
-
 			telemetry.current_messages.compid = message.compid;
 			telemetry.current_messages.sysid = message.sysid;
 
@@ -234,6 +234,5 @@ void vTelemetryTimerCallback(TimerHandle_t pxTimer) {
 				}
 			}
 		}
-		xTimerReset(telemetryTimer, 10);
 	}
 }

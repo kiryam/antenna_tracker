@@ -106,7 +106,7 @@ extern "C" {
  * For such ports, make sure the TzCtrl priority is high enough to ensure
  * reliable periodic execution and transfer of the data.
  ******************************************************************************/
-#define TRC_CFG_CTRL_TASK_PRIORITY 1
+#define TRC_CFG_CTRL_TASK_PRIORITY 2
 
 /*******************************************************************************
  * Configuration Macro: TRC_CFG_CTRL_TASK_DELAY
@@ -115,7 +115,7 @@ extern "C" {
  * CPU load, but may cause missed events if the TzCtrl task is performing the 
  * trace transfer.
  ******************************************************************************/
-#define TRC_CFG_CTRL_TASK_DELAY ((10 * configTICK_RATE_HZ) / 1000)
+#define TRC_CFG_CTRL_TASK_DELAY ((5 * configTICK_RATE_HZ) / 1000)
 
 /*******************************************************************************
  * Configuration Macro: TRC_CFG_PAGED_EVENT_BUFFER_PAGE_COUNT

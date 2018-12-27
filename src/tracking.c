@@ -16,11 +16,12 @@ static float lonScaleDown=0.0;               // longitude scaling
 
 uint32_t home_dist;
 int16_t Elevation;
-int16_t Bearing;
+float Bearing;
 static bool tracking_log_enable;
 float BearingTuning;
-static TimerHandle_t trackerTimer = NULL;
+TimerHandle_t trackerTimer = NULL;
 void vAntennaTrackingTimerCallback(TimerHandle_t pxTimer);
+void calc_longitude_scaling(int32_t lat);
 
 static BaseType_t prvTrackingLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString ) {
 	int8_t *pcParameter1;
@@ -59,10 +60,6 @@ int InitTracking() {
 		ERROR("Failed to create trackerTimer");
 		return 1;
 	}
-	if ( xTimerStart(trackerTimer,  ( TickType_t ) 10) == pdFAIL ) {
-		ERROR("Failed to start trackerTimer");
-		return 1;
-	}
 
 	TRACE_CHECKPOINT("tracking init done");
 	return 0;
@@ -97,11 +94,11 @@ double getDistanceFromLatLonInMeter(double lat1, double lon1, double lat2, doubl
 }
 
 
-int16_t calc_bearing(int32_t lon1, int32_t lat1, int32_t lon2, int32_t lat2) {
+float calc_bearing(int32_t lon1, int32_t lat1, int32_t lon2, int32_t lat2) {
     float dLat = (lat2 - lat1);
     float dLon = (float)(lon2 - lon1) * lonScaleDown;
     home_dist = sqrt(sq(fabs(dLat)) + sq(fabs(dLon))) * 1.113195; // home dist in cm.
-    int16_t b = (int)round( -90 + (atan2(dLat, -dLon) * 57.295775));
+    float b =  -90 + (atan2(dLat, -dLon) * 57.295775);
     if(b < 0) b += 360;
     return b;
 }
@@ -118,17 +115,14 @@ void vAntennaTrackingTimerCallback(TimerHandle_t pxTimer) {
 	(void) pxTimer;
 
 	if( /*gps.fix == MINMEA_GPGSA_FIX_2D &&*/  telemetry.status == TELEMETRY_OK ) {
-		// TODO add caching
 		calc_longitude_scaling(gps.lon);
-		uint16_t bearing = calc_bearing(gps.lon,gps.lat,telemetry.current_messages.gps_raw_int.lon,telemetry.current_messages.gps_raw_int.lat);
+		Bearing = calc_bearing(gps.lon,gps.lat,telemetry.current_messages.gps_raw_int.lon,telemetry.current_messages.gps_raw_int.lat);
 		Elevation = calc_elevation(telemetry.current_messages.gps_raw_int.alt - gps.alt);
-		if(bearing >= home_bearing){
-			bearing -= home_bearing;
-		} else {
-			bearing += 360 - home_bearing;
-		}
-
-		Bearing = bearing;
+		//if(bearing >= home_bearing){
+		//	bearing -= home_bearing;
+		//} else {
+		//	bearing += 360 - home_bearing;
+		//}
 
 		if (tracking_log_enable ) {
 			INFO("Track to Bearing: %d Elevation: %d (home dist: %d)", Bearing, Elevation, home_dist);

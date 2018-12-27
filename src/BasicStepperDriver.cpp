@@ -17,6 +17,11 @@
 #include "stm32f10x.h"
 
 
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
 #define HIGH Bit_SET
 #define LOW Bit_RESET
 
@@ -161,7 +166,7 @@ void BasicStepperDriver::alterMove(long steps){
         if (steps >= 0){
             steps_remaining += steps;
         } else {
-            // FIXME steps_remaining = max(steps_to_brake, steps_remaining+steps);
+            steps_remaining = max(steps_to_brake, steps_remaining+steps);
         };
         break;
     case DECELERATING:
@@ -263,25 +268,28 @@ void BasicStepperDriver::calcStepPulse(void){
  */
 long BasicStepperDriver::nextAction(void){
     if (steps_remaining > 0){
-        delayMicros(next_action_interval, last_action_end);
+    	delayUS_DWT(next_action_interval);
+        //delayMicros(next_action_interval, last_action_end);
         /*
          * DIR pin is sampled on rising STEP edge, so it is set first
          */
         digitalWrite(dir_gpiox, dir_pin, dir_state);
         digitalWrite(step_gpiox, step_pin, HIGH);
-        unsigned m = getMicros();
+       // unsigned m = getMicros();
         long pulse = step_pulse; // save value because calcStepPulse() will overwrite it
         calcStepPulse();
-        m = getMicros() - m;
+        //m = getMicros() - m;
         // We should pull HIGH for 1-2us (step_high_min)
-        if (m < step_high_min){ // fast MCPU or CONSTANT_SPEED
-        	delayMicros(step_high_min-m);
-        	m = step_high_min;
-        };
+        //if (m < step_high_min){ // fast MCPU or CONSTANT_SPEED
+        	//delayMicros(step_high_min-m);
+        delayUS_DWT(step_high_min);
+        //	m = step_high_min;
+       // };
         digitalWrite(step_gpiox, step_pin, LOW);
         // account for calcStepPulse() execution time; sets ceiling for max rpm on slower MCUs
-        last_action_end = getMicros();
-        next_action_interval = (pulse > m) ? pulse - m : 1;
+        //last_action_end = getMicros();
+        //next_action_interval = (pulse > m) ? pulse - m : 1;
+        next_action_interval = pulse;
     } else {
         // end of move
         last_action_end = 0;

@@ -17,9 +17,14 @@
 
 uint16_t home_bearing = 360;
 void* I2C_mtx;
-volatile uint32_t micros =0;
+volatile uint32_t ticks =0;
 traceString traceChn;
 void vMoveTimerCallback(TimerHandle_t pxTimer);
+
+static struct {
+	TaskHandle_t	Message;
+	uint16_t	Time;
+} delays1us[DelayCOUNT];
 
 #ifdef ENABLE_SERIAL
 	#include "serial.h"
@@ -56,7 +61,6 @@ void vMoveTimerCallback(TimerHandle_t pxTimer);
 #ifdef ENABLE_CONTROLS
 	#include "controls.h"
 #endif
-
 
 int main(int argc, char* argv[]) {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
@@ -113,11 +117,9 @@ int main(int argc, char* argv[]) {
 		}
 	#endif
 
-
-	TaskHandle_t xHandle = NULL;
-	uint8_t ucParameterToPass;
-
 	#ifdef ENABLE_GUI
+		TaskHandle_t xHandle = NULL;
+		uint8_t ucParameterToPass;
 		if (xTaskCreate(UIInitTask, "uiInitTask", configMINIMAL_STACK_SIZE, &ucParameterToPass, tskIDLE_PRIORITY, &xHandle ) != pdPASS ) {
 			ERROR("UI init failed to start");
 		}else{
@@ -158,15 +160,33 @@ int main(int argc, char* argv[]) {
 
 
 void vMoveTimerCallback(TimerHandle_t pxTimer) {
+    pointTo(90);
+    pointTo(-90);
+    pointTo(0);
+    vTaskDelay(500);
     SetServoPosSmooth(SERVO_MAX_ANGILE,SERVO_SPEED_NORMAL);
     SetServoPosSmooth(SERVO_MIN_ANGILE,SERVO_SPEED_NORMAL);
     resetHome();
+
+    if ( xTimerStart(trackerTimer,  ( TickType_t ) 10) == pdFAIL ) {
+		ERROR("Failed to start trackerTimer");
+	}
+
 	xTimerDelete( pxTimer, 10 );
 }
 
-uint32_t getMicros(){
-	return micros;
+#pragma GCC push_options
+#pragma GCC optimize ("O3")
+void delayUS_DWT(uint32_t us) {
+	if(us ==0){
+		return;
+	}
+	volatile uint32_t cycles = (SystemCoreClock/1000000L)*us;
+	volatile uint32_t start = DWT->CYCCNT;
+	do  {
+	} while(DWT->CYCCNT - start < cycles);
 }
+#pragma GCC pop_options
 
 #ifdef __cplusplus
 extern "C" {
@@ -183,20 +203,6 @@ extern "C" {
 		#if defined(DEBUG)
 			asm volatile ("bkpt 0");
 		#endif
-	}
-
-	void SysTick_Handler(){
-		micros++;
-		portDISABLE_INTERRUPTS();
-		{
-			/* Increment the RTOS tick. */
-			if( xTaskIncrementTick() != pdFALSE ) {
-				/* A context switch is required.  Context switching is performed in
-				the PendSV interrupt.  Pend the PendSV interrupt. */
-				portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;
-			}
-		}
-		portENABLE_INTERRUPTS();
 	}
 #ifdef __cplusplus
 }

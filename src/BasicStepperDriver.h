@@ -39,18 +39,19 @@ public:
         short accel = 1000;     // acceleration [steps/s^2]
         short decel = 1000;     // deceleration [steps/s^2]
     };
-    static inline void delayMicros(unsigned long delay_us, unsigned long start_us = 0){
+   /* static inline void delayMicros(unsigned long delay_us, unsigned long start_us = 0){
            if (delay_us){
+        	   //Delay1us(delay_us);
                if (!start_us){
                    start_us = getMicros();
                }
                if (delay_us > MIN_YIELD_MICROS){
                    return;
                }
-               // See https://www.gammon.com.au/millis
+              // // See https://www.gammon.com.au/millis
                while (getMicros() - start_us < delay_us);
            }
-       }
+       }*/
 
 
 private:

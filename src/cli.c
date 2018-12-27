@@ -9,7 +9,6 @@
 #define MAX_INPUT_LENGTH    50
 #define MAX_OUTPUT_LENGTH   configCOMMAND_INT_MAX_OUTPUT_SIZE
 
-#define COMMAND_TASKS
 static int8_t pcOutputString[ MAX_OUTPUT_LENGTH ], pcInputString[ MAX_INPUT_LENGTH ];
 static uint16_t cRxedChar;
 static TimerHandle_t cliTimer = NULL;

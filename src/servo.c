@@ -3,8 +3,12 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
+#include "timers.h"
+#include "tracking.h"
 
+static TimerHandle_t servoTimer = NULL;
 static int8_t servoCurrentAnglie;
+void vServoTimerCallback(TimerHandle_t pxTimer);
 
 int ServoInit() {
 	TRACE_CHECKPOINT("servo init start");
@@ -39,8 +43,29 @@ int ServoInit() {
     ServoSetPos(SERVO_MIN_ANGILE);
     TIM_Cmd(TIM2, ENABLE);
 
+
+	servoTimer = xTimerCreate( "servoTimer", 50 ,pdTRUE,0, vServoTimerCallback);
+	if (servoTimer == NULL) {
+		ERROR("Failed to create servoTimer");
+		return 1;
+	}
+
+	if ( xTimerStart(servoTimer,  ( TickType_t ) 10) == pdFAIL ) {
+		ERROR("Failed to start servoTimer");
+		return 1;
+	}
+
     TRACE_CHECKPOINT("servo init done");
     return 0;
+}
+
+void vServoTimerCallback(TimerHandle_t pxTimer){
+	( void ) pxTimer;
+	#ifdef SERVO_FLIP
+		SetServoPosSmooth(abs(SERVO_MIN_ANGILE-Elevation),SERVO_SPEED_NORMAL);
+	#else
+		SetServoPosSmooth(Elevation,SERVO_SPEED_NORMAL);
+	#endif
 }
 
 void ServoSetPos(int8_t angile) {

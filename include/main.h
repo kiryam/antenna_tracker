@@ -5,11 +5,14 @@
 #define ENABLE_TELEMTRY
 #define ENABLE_STEPPER
 #define ENABLE_SERVO
-
 #define ENABLE_COMPASS
 #define ENABLE_GUI
 #define ENABLE_TRACKING
 #define ENABLE_CONTROLS
+
+#define COMMAND_STEPPER
+#define COMMAND_TASKS
+
 
 #include "stdbool.h"
 #include "stdint.h"
@@ -46,15 +49,15 @@
 	#ifdef TELEMETRY_FAKE
 		#define TELEMETRY_FAKE_ALT 1000*10 // 1000m
 
-		#define TELEMETRY_FAKE_LAT 558444992
-		#define TELEMETRY_FAKE_LON 373717152
+		//#define TELEMETRY_FAKE_LAT 558444992
+		//#define TELEMETRY_FAKE_LON 373717152
 
 		//#define TELEMETRY_FAKE_LAT 555066512
 		//#define TELEMETRY_FAKE_LON 372232240
 
 		// yurlovo
-		//#define TELEMETRY_FAKE_LAT 558940620
-		//#define TELEMETRY_FAKE_LON 372514570
+		#define TELEMETRY_FAKE_LAT 5589406200
+		#define TELEMETRY_FAKE_LON 3725145700
 	#endif
 #endif
 
@@ -62,18 +65,24 @@
 #ifdef ENABLE_GPS
 	#define GPS_FAKE
 	#ifdef GPS_FAKE
-		#define GPS_FAKE_LAT 558444992
-		#define GPS_FAKE_LON 373717152
+		//Yurlovo
+		#define GPS_FAKE_LAT 558944890
+		#define GPS_FAKE_LON 372504560
 		#define GPS_FAKE_ALT 300*10 // 300m
+
+		//#define GPS_FAKE_LAT 558444992
+		//#define GPS_FAKE_LON 373717152
+		//#define GPS_FAKE_ALT 300*10 // 300m
 	#endif
 #endif
+
+#define DelayCOUNT	10
 
 extern int16_t encoder_value;
 extern bool btn1;
 extern bool btn2;
 extern uint16_t home_bearing;
 extern void* I2C_mtx;
-extern volatile uint32_t micros;
 extern traceString traceChn;
-uint32_t getMicros();
+void delayUS_DWT(uint32_t us);
 

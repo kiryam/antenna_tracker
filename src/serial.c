@@ -95,7 +95,7 @@ void USART2_IRQHandler(){
 
 int serialSendStr(char* str){
 	int i = -1;
-	taskENTER_CRITICAL();
+	taskENTER_CRITICAL(); // migrate to mutex
 	while((i++)< MAX_STRING_LEN){
 		if (str[i] == '\0') {
 			USART_SendData(SERIAL_USART, 10);

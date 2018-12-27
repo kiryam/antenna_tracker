@@ -5,3 +5,4 @@
 
 int StepperInit();
 int resetHome();
+void pointTo(float angile);

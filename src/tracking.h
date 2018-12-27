@@ -1,6 +1,8 @@
 #pragma once
 
 #include "stdint.h"
+#include "FreeRTOS.h"
+#include "timers.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -10,8 +12,9 @@ extern "C" {
 
 	extern uint32_t home_dist;
 	extern int16_t Elevation;
-	extern int16_t Bearing;
+	extern float Bearing;
 	extern float BearingTuning;
+	extern TimerHandle_t trackerTimer;
 
 #ifdef __cplusplus
 }

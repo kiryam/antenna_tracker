@@ -1,6 +1,7 @@
 #include "BasicStepperDriver.h"
 #include "stm32f10x.h"
 #include "FreeRTOS.h"
+
 #include "task.h"
 #include "compass.h"
 #include "stdlib.h"
@@ -20,7 +21,39 @@ static TimerHandle_t stepperTimer = NULL;
 static float currentAngile = 0;
 BasicStepperDriver stepper(MOTOR_STEPS, GPIOA, STEPPER_DIR, GPIOA, STEPPER_STEP, GPIOB, STEPPER_ENABLE);
 
+
+#ifdef COMMAND_STEPPER
+#ifdef __cplusplus
+extern "C" {
+#endif
+	#include "FreeRTOS_CLI.h"
+#ifdef __cplusplus
+}
+#endif
+
+static BaseType_t prvStepperAngileCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString ) {
+	const char *pcParameter1;
+	BaseType_t xParameter1Length;
+	pcParameter1 = FreeRTOS_CLIGetParameter ( pcCommandString, 1, &xParameter1Length);
+	snprintf( (char*)pcWriteBuffer, xWriteBufferLen, "Moving to angile %d\r\n", atoi(pcParameter1) );
+	pointTo(atoi(pcParameter1));
+	return pdFALSE;
+}
+
+static const CLI_Command_Definition_t xTasksCommand = {
+	"stepper_move_angile",
+	"stepper_move_angile <ANGILE>:\r\n Point to angile [-360 - +360]\r\n",
+	prvStepperAngileCommand,
+	1
+};
+
+#endif
+
 int StepperInit() {
+	#ifdef COMMAND_STEPPER
+		FreeRTOS_CLIRegisterCommand( &xTasksCommand );
+	#endif
+
 	TRACE_CHECKPOINT("stepper init start");
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
@@ -38,8 +71,8 @@ int StepperInit() {
 	gpio_port.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOB, &gpio_port);
 
-	stepper.setSpeedProfile(stepper.LINEAR_SPEED, 100, 100);
- 	stepper.begin(1, 16);
+	stepper.setSpeedProfile(stepper.LINEAR_SPEED, 5, 5);
+ 	stepper.begin(180, 16);
 
 
  	stepperTimer = xTimerCreate( "stepperTimer", 100, pdTRUE,0, vStepperTimerCallback);
@@ -86,7 +119,9 @@ void pointTo(float angile){
 		dir = 1;
 		diff = (float)360-diff;
 	}
+	//taskENTER_CRITICAL();
 	stepper.rotate(diff * dir);
+	//taskEXIT_CRITICAL();
 
 	currentAngile = angile;
 	INFO("Rotate: %f, current angile: %f", -1*diff*dir, currentAngile);

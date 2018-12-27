@@ -108,7 +108,7 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 #define vPortSVCHandler SVC_Handler
 #define xPortPendSVHandler PendSV_Handler
 #define vPortSVCHandler SVC_Handler
-//#define xPortSysTickHandler SysTick_Handler // SEE main.cpp SysTick_Handler implementation
+#define xPortSysTickHandler SysTick_Handler // SEE main.cpp SysTick_Handler implementation
 
 
 #define configAPPLICATION_PROVIDES_cOutputBuffer 0
