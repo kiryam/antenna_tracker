@@ -21,10 +21,6 @@ volatile uint32_t ticks =0;
 traceString traceChn;
 void vMoveTimerCallback(TimerHandle_t pxTimer);
 
-static struct {
-	TaskHandle_t	Message;
-	uint16_t	Time;
-} delays1us[DelayCOUNT];
 
 #ifdef ENABLE_SERIAL
 	#include "serial.h"
@@ -160,12 +156,12 @@ int main(int argc, char* argv[]) {
 
 
 void vMoveTimerCallback(TimerHandle_t pxTimer) {
-    pointTo(90);
-    pointTo(-90);
-    pointTo(0);
-    vTaskDelay(500);
-    SetServoPosSmooth(SERVO_MAX_ANGILE,SERVO_SPEED_NORMAL);
-    SetServoPosSmooth(SERVO_MIN_ANGILE,SERVO_SPEED_NORMAL);
+    //pointTo(90);
+    //pointTo(-90);
+    //pointTo(0);
+    //vTaskDelay(500);
+    //SetServoPosSmooth(SERVO_MAX_ANGILE,SERVO_SPEED_NORMAL);
+    //SetServoPosSmooth(SERVO_MIN_ANGILE,SERVO_SPEED_NORMAL);
     resetHome();
 
     if ( xTimerStart(trackerTimer,  ( TickType_t ) 10) == pdFAIL ) {

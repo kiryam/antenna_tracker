@@ -116,8 +116,8 @@ void vAntennaTrackingTimerCallback(TimerHandle_t pxTimer) {
 
 	if( /*gps.fix == MINMEA_GPGSA_FIX_2D &&*/  telemetry.status == TELEMETRY_OK ) {
 		calc_longitude_scaling(gps.lon);
-		Bearing = calc_bearing(gps.lon,gps.lat,telemetry.current_messages.gps_raw_int.lon,telemetry.current_messages.gps_raw_int.lat);
-		Elevation = calc_elevation(telemetry.current_messages.gps_raw_int.alt - gps.alt);
+		Bearing = calc_bearing(gps.lon,gps.lat,telemetry.lon,telemetry.lat);
+		Elevation = calc_elevation(telemetry.alt - gps.alt);
 		//if(bearing >= home_bearing){
 		//	bearing -= home_bearing;
 		//} else {

@@ -2,7 +2,8 @@
 
 #include "stdint.h"
 #include "common/mavlink.h"
-
+#include "FreeRTOS.h"
+#include "queue.h"
 typedef struct __Mavlink_Messages {
 
 	int sysid;
@@ -61,12 +62,15 @@ typedef struct __Mavlink_Messages {
 typedef struct __TELEMENTRY_STATS {
 	uint32_t rx_good;
 	uint32_t rx_bad;
-	Mavlink_Messages current_messages;
+	//Mavlink_Messages current_messages;
+	int32_t lat;
+	int32_t lon;
+	int32_t alt;
 	uint8_t status;
 } TelemetryStats;
 
 extern TelemetryStats telemetry;
-
+extern QueueHandle_t telemetryRxQueue;
 
 #ifdef __cplusplus
 extern "C" {

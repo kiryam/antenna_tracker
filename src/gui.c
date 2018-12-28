@@ -57,7 +57,7 @@ void UIInitTask(void* pvParameters) {
 	screen_i= 3;
 	active_screen = screen_sequence[screen_i];
 
- 	guiTimer = xTimerCreate( "guiTimer", 100, pdTRUE,0, vUIRenderTimerCallback);
+ 	guiTimer = xTimerCreate( "guiTimer", 1000, pdTRUE,0, vUIRenderTimerCallback);
 	if (guiTimer == NULL) {
 		ERROR("Failed to create guiTimer");
 	}
@@ -422,8 +422,8 @@ void InfoScreenRender(){
 	if (active_screen == SCREEN_TELEMETRY ){
 		gwinSetIntCached(0, ghTelemetryRxGood, telemetry.rx_good, TRUE);
 		gwinSetIntCached(1, ghTelemetryRxBad, telemetry.rx_bad, TRUE);
-		gwinSetDegE7Cached(2, ghTelemetryPosLat, telemetry.current_messages.gps_raw_int.lat, TRUE);
-		gwinSetDegE7Cached(3, ghTelemetryPosLon, telemetry.current_messages.gps_raw_int.lon, TRUE);
+		gwinSetDegE7Cached(2, ghTelemetryPosLat, telemetry.lat, TRUE);
+		gwinSetDegE7Cached(3, ghTelemetryPosLon, telemetry.lon, TRUE);
 	} else if (active_screen == SCREEN_SYSTEM ){
 		gwinSetIntCached(0, ghSystemHeapFree, xPortGetFreeHeapSize(), TRUE);
 	} else if (active_screen == SCREEN_SYSTEM ){

@@ -13,6 +13,8 @@
 #define COMMAND_STEPPER
 #define COMMAND_TASKS
 
+#define PROTOCOL_LIGHTTELEMETRY
+
 
 #include "stdbool.h"
 #include "stdint.h"
