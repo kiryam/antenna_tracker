@@ -1,6 +1,5 @@
 #pragma once
 
-#define GPS_BAUD 9600
 
 #ifdef __cplusplus
 extern "C" {

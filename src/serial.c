@@ -6,6 +6,7 @@
 #include "assert.h"
 #include "serial.h"
 #include "cli.h"
+#include "settings.h"
 
 #define SERIAL_USART USART2
 #define MAX_STRING_LEN 1024
@@ -48,7 +49,7 @@ int serialInit() {
 	GPIO_Init(GPIOA, &gpio_port1);
 
 	USART_InitTypeDef usart;
-	usart.USART_BaudRate = 115200;
+	usart.USART_BaudRate = settingsGetInt32(SERIAL_BAUD);
 	usart.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	usart.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	usart.USART_Parity = USART_Parity_No;

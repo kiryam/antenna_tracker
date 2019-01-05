@@ -9,6 +9,7 @@
 #include "serial.h"
 #include "string.h"
 #include "gps.h"
+#include "settings.h"
 
 #define GPS_USART USART3
 #define GPS_USART_IRQ USART3_IRQn
@@ -92,7 +93,7 @@ int gpsInit(){
 	GPIO_Init(GPIOB, &gpio_port1);
 
 	USART_InitTypeDef usart;
-	usart.USART_BaudRate = GPS_BAUD;
+	usart.USART_BaudRate = settingsGetInt32(GPS_BAUD);
 	usart.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	usart.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	usart.USART_Parity = USART_Parity_No;

@@ -26,6 +26,10 @@ void vMoveTimerCallback(TimerHandle_t pxTimer);
 	#include "serial.h"
 #endif
 
+#ifdef ENABLE_SETTINGS
+	#include "settings.h"
+#endif
+
 #ifdef ENABLE_GPS
 	#include "gps.h"
 #endif
@@ -65,10 +69,19 @@ int main(int argc, char* argv[]) {
 	vTraceEnable(TRC_START);
 	I2C_mtx = xSemaphoreCreateMutex();
 
+
+	#ifdef ENABLE_SETTINGS
+		if (InitSettings() != 0 ){
+			#if defined(DEBUG)
+				asm volatile ("bkpt 0");
+			#endif
+		}
+	#endif
+
 	#ifdef ENABLE_SERIAL
 		if ( serialInit() != 0) {
 			ERROR("Failed to init serial");
-		}else {
+		} else {
 			INFO("Serial init done");
 		}
 	#endif
@@ -77,7 +90,7 @@ int main(int argc, char* argv[]) {
 		if ( gpsInit() != 0) {
 			ERROR("Failed to init gps");
 		}else {
-			INFO("GPS init done at %d", GPS_BAUD);
+			INFO("GPS init done at %d", settingsGetInt32(GPS_BAUD));
 		}
 	#endif
 

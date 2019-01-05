@@ -33,7 +33,6 @@ void vCLITimerCallback(TimerHandle_t pxTimer);
 	};
 #endif
 
-
 int initCLI(){
 	#ifdef COMMAND_TASKS
 		FreeRTOS_CLIRegisterCommand( &xTasksCommand );
