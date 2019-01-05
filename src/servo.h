@@ -16,8 +16,8 @@
 #ifdef SERVO_90
 	#define SERVO_MAX_PULSE 190
 	#define SERVO_MIN_PULSE 80
-	#define SERVO_MIN_ANGILE 90
-	#define SERVO_MAX_ANGILE 0
+	#define SERVO_MIN_ANGILE 0.0
+	#define SERVO_MAX_ANGILE 90.0
 	#define SERVO_FLIP 1
 #endif
 
@@ -40,8 +40,8 @@ extern "C" {
 #endif
 #include "stdint.h"
 	int ServoInit();
-	void ServoSetPos(int8_t angile);
-	void SetServoPosSmooth(int8_t angile, uint16_t degreePerSecond);
+	void ServoSetPos(float angile);
+	void SetServoPosSmooth(float angile, uint16_t degreePerSecond);
 
 #ifdef __cplusplus
 }

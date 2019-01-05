@@ -78,18 +78,20 @@ int serialInit() {
 }
 
 void USART2_IRQHandler(){
-	uint16_t cIn;
-	BaseType_t xHigherPriorityTaskWoken;
+	if(USART_GetITStatus(SERIAL_USART, USART_IT_RXNE) != RESET){
+		uint16_t cIn;
+		BaseType_t xHigherPriorityTaskWoken;
 
-	xHigherPriorityTaskWoken = pdFALSE;
-	do {
-		cIn = USART_ReceiveData (SERIAL_USART);
+		xHigherPriorityTaskWoken = pdFALSE;
+		do {
+			cIn = USART_ReceiveData (SERIAL_USART);
+			xQueueSendFromISR( serialRxQueue, &cIn, &xHigherPriorityTaskWoken );
+		} while( USART_GetFlagStatus(SERIAL_USART, USART_FLAG_RXNE) );
+
 		USART_ClearITPendingBit(SERIAL_USART, USART_IT_RXNE);
-		xQueueSendFromISR( serialRxQueue, &cIn, &xHigherPriorityTaskWoken );
-	} while( USART_GetITStatus(SERIAL_USART, USART_IT_RXNE) );
-
-	if( xHigherPriorityTaskWoken ) {
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		if( xHigherPriorityTaskWoken ) {
+			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		}
 	}
 }
 

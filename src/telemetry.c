@@ -85,7 +85,7 @@ int InitTelemetry(){
 
 	NVIC_EnableIRQ(USART1_IRQn);
 
-	telemetryTimer = xTimerCreate( "telemetryTimer", ( 500 / portTICK_PERIOD_MS),pdTRUE,0, vTelemetryTimerCallback);
+	telemetryTimer = xTimerCreate( "telemetryTimer", 200 ,pdTRUE,0, vTelemetryTimerCallback);
 	if (telemetryTimer == NULL) {
 		ERROR("Failed to create telemetryTimer");
 		return 1;
@@ -99,25 +99,22 @@ int InitTelemetry(){
 	return 0;
 }
 
-
 void USART1_IRQHandler(){
 	if(USART_GetITStatus(TELEMETRY_USART, USART_IT_RXNE) != RESET) {
-		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
-
 		uint16_t cIn;
 		BaseType_t xHigherPriorityTaskWoken;
 
-		//xHigherPriorityTaskWoken = pdFALSE;
+		xHigherPriorityTaskWoken = pdFALSE;
 		do {
 			cIn = USART_ReceiveData (TELEMETRY_USART);
 			xQueueSendFromISR( telemetryRxQueue, &cIn, &xHigherPriorityTaskWoken );
-		} while( USART_GetITStatus(TELEMETRY_USART, USART_IT_RXNE) );
-
+		} while( USART_GetFlagStatus(TELEMETRY_USART, USART_FLAG_RXNE) );
 
 		USART_ClearITPendingBit(TELEMETRY_USART, USART_IT_RXNE);
-		//if( xHigherPriorityTaskWoken ) {
-		//	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-		//}
+
+		if( xHigherPriorityTaskWoken ) {
+			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		}
 	}
 }
 

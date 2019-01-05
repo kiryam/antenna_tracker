@@ -71,8 +71,8 @@ int StepperInit() {
 	gpio_port.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOB, &gpio_port);
 
-	stepper.setSpeedProfile(stepper.LINEAR_SPEED, 5, 5);
- 	stepper.begin(180, 16);
+	stepper.setSpeedProfile(stepper.LINEAR_SPEED, 8, 8);
+ 	stepper.begin(60, 16);
 
 
  	stepperTimer = xTimerCreate( "stepperTimer", 100, pdTRUE,0, vStepperTimerCallback);
@@ -124,6 +124,6 @@ void pointTo(float angile){
 	//taskEXIT_CRITICAL();
 
 	currentAngile = angile;
-	INFO("Rotate: %f, current angile: %f", -1*diff*dir, currentAngile);
+	INFO("Stepper rotate: %f, current angile: %f", -1*diff*dir, currentAngile);
 	TRACE_CHECKPOINT("POINT TO DONE");
 }

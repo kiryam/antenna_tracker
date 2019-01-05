@@ -5,9 +5,10 @@
 #include "main.h"
 #include "timers.h"
 #include "tracking.h"
+#include "stdlib.h"
 
 static TimerHandle_t servoTimer = NULL;
-static int8_t servoCurrentAnglie;
+static float servoCurrentAnglie;
 void vServoTimerCallback(TimerHandle_t pxTimer);
 
 int ServoInit() {
@@ -44,7 +45,7 @@ int ServoInit() {
     TIM_Cmd(TIM2, ENABLE);
 
 
-	servoTimer = xTimerCreate( "servoTimer", 50 ,pdTRUE,0, vServoTimerCallback);
+	servoTimer = xTimerCreate( "servoTimer", 100 ,pdTRUE,0, vServoTimerCallback);
 	if (servoTimer == NULL) {
 		ERROR("Failed to create servoTimer");
 		return 1;
@@ -61,36 +62,34 @@ int ServoInit() {
 
 void vServoTimerCallback(TimerHandle_t pxTimer){
 	( void ) pxTimer;
-	#ifdef SERVO_FLIP
-		SetServoPosSmooth(abs(SERVO_MIN_ANGILE-Elevation),SERVO_SPEED_NORMAL);
-	#else
-		SetServoPosSmooth(Elevation,SERVO_SPEED_NORMAL);
-	#endif
+	SetServoPosSmooth(Elevation,SERVO_SPEED_SLOW);
 }
 
-void ServoSetPos(int8_t angile) {
-	if (SERVO_MIN_ANGILE < SERVO_MAX_ANGILE ){
+void ServoSetPos(float angile) {
+	#if SERVO_FLIP == 0
 		TIM2->CCR1 = map(angile, SERVO_MIN_ANGILE, SERVO_MAX_ANGILE, SERVO_MIN_PULSE, SERVO_MAX_PULSE);
-	}else{
-		TIM2->CCR1 = map(angile, SERVO_MIN_ANGILE, SERVO_MAX_ANGILE, SERVO_MAX_PULSE, SERVO_MIN_PULSE);
-	}
+	#else
+		TIM2->CCR1 = map(angile, SERVO_MAX_ANGILE, SERVO_MIN_ANGILE, SERVO_MIN_PULSE, SERVO_MAX_PULSE);
+	#endif
 	servoCurrentAnglie = angile;
 }
 
-void SetServoPosSmooth(int8_t angile, uint16_t degreePerSecond){
-	if (angile == servoCurrentAnglie) {
+void SetServoPosSmooth(float angile, uint16_t degreePerSecond){
+	float stepDegree = 0.1;
+	if (abs(angile-servoCurrentAnglie) < stepDegree ) {
 		return; // do nothing
 	}
+	INFO("Servo move: %f, current angile: %f", angile, servoCurrentAnglie);
 
 	if (angile > servoCurrentAnglie){
-		for(int i=servoCurrentAnglie; i<angile;i++){
+		for(float i=servoCurrentAnglie; i<=angile;i+=stepDegree){
 			ServoSetPos(i);
-			vTaskDelay(1000/degreePerSecond);
+			vTaskDelay(1000/degreePerSecond*stepDegree);
 		}
 	}else{
-		for(int i=servoCurrentAnglie; i>angile;i--){
+		for(float i=servoCurrentAnglie; i>=angile;i-=stepDegree){
 			ServoSetPos(i);
-			vTaskDelay(1000/degreePerSecond);
+			vTaskDelay(1000/degreePerSecond*stepDegree);
 		}
 	}
 }

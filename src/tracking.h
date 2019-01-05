@@ -11,7 +11,7 @@ extern "C" {
 	int InitTracking();
 
 	extern uint32_t home_dist;
-	extern int16_t Elevation;
+	extern float Elevation;
 	extern float Bearing;
 	extern float BearingTuning;
 	extern TimerHandle_t trackerTimer;

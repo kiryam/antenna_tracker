@@ -177,6 +177,13 @@ void delayUS_DWT(uint32_t us) {
 	if(us ==0){
 		return;
 	}
+	if (us > 1000) {
+		uint16_t task_sleep = us/1000;
+		us -=task_sleep*1000;
+		vTaskDelay(task_sleep);
+		//NFO("DELAY > 1000us vTaskDelay: %d, DWT: %d", task_sleep,us);
+
+	}
 	volatile uint32_t cycles = (SystemCoreClock/1000000L)*us;
 	volatile uint32_t start = DWT->CYCCNT;
 	do  {

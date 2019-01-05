@@ -28,8 +28,6 @@
   static uint8_t LTMreadIndex;
   static uint8_t LTMframelength;
 
-
-
 uint8_t ltmread_u8()  {
   return LTMserialBuffer[LTMreadIndex++];
 }
@@ -46,6 +44,9 @@ uint32_t ltmread_u32() {
   return t;
 }
 
+int32_t ltmread_i32() {
+	return ltmread_u32();
+}
 
 void ltm_read() {
   uint16_t c;
@@ -115,20 +116,13 @@ void ltm_check() {
   if (LTMcmd==LIGHTTELEMETRY_GFRAME) {
 	  telemetry.lat = (int32_t)ltmread_u32();
 	  telemetry.lon = (int32_t)ltmread_u32();
-	  ltmread_u8(); // uav_groundspeedms
-	  // uav_groundspeed = (uint16_t) round((float)(uav_groundspeedms * 3.6f)); // convert to kmh
+	  uint8_t uav_groundspeedms = ltmread_u8();
+	  telemetry.groundspeed_ms = (uint16_t) round((float)(uav_groundspeedms * 3.6f)); // convert to kmh
       telemetry.alt = (int32_t)ltmread_u32();
-      //  uint8_t ltm_satsfix = ltmread_u8();
-      // uav_satellites_visible         = (ltm_satsfix >> 2) & 0xFF;
-      // uav_fix_type                   = ltm_satsfix & 0b00000011;
+      uint8_t ltm_satsfix = ltmread_u8();
+      telemetry.satellites_visible = (ltm_satsfix >> 2) & 0xFF;
+      telemetry.fix_type = ltm_satsfix & 0b00000011;
       memset(LTMserialBuffer, 0, LIGHTTELEMETRY_GFRAMELENGTH-4);
-
-   // int32_t uav_lat = 558884764;
-   /// int8_t b1=(uav_lat >> 8*0) & 0xFF;
-   // int8_t b2=(uav_lat >> 8*1) & 0xFF;
-   // int8_t b3=(uav_lat >> 8*2) & 0xFF;
-   // int8_t b4=(uav_lat >> 8*3) & 0xFF;
-   // INFO("%d, %d, %d, %d", b1, b2, b3, b4);
   }
 
   if (LTMcmd==LIGHTTELEMETRY_AFRAME)

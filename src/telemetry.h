@@ -62,11 +62,13 @@ typedef struct __Mavlink_Messages {
 typedef struct __TELEMENTRY_STATS {
 	uint32_t rx_good;
 	uint32_t rx_bad;
-	//Mavlink_Messages current_messages;
 	int32_t lat;
 	int32_t lon;
 	int32_t alt;
+	uint16_t groundspeed_ms;
 	uint8_t status;
+	uint8_t satellites_visible;
+	uint8_t fix_type;
 } TelemetryStats;
 
 extern TelemetryStats telemetry;

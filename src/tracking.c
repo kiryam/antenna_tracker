@@ -15,7 +15,7 @@
 static float lonScaleDown=0.0;               // longitude scaling
 
 uint32_t home_dist;
-int16_t Elevation;
+float Elevation;
 float Bearing;
 static bool tracking_log_enable;
 float BearingTuning;
@@ -55,7 +55,7 @@ int InitTracking() {
 		return 1;
 	}
 
-	trackerTimer = xTimerCreate( "trackerTimer", 50 ,pdTRUE,0, vAntennaTrackingTimerCallback);
+	trackerTimer = xTimerCreate( "trackerTimer", 200 ,pdTRUE,0, vAntennaTrackingTimerCallback);
 	if (trackerTimer == NULL) {
 		ERROR("Failed to create trackerTimer");
 		return 1;
@@ -103,11 +103,11 @@ float calc_bearing(int32_t lon1, int32_t lat1, int32_t lon2, int32_t lat2) {
     return b;
 }
 
-int16_t calc_elevation(int32_t alt) {
+float calc_elevation(int32_t alt) {
     float at = atan2(alt, home_dist);
     at = at * 57.2957795;
-    int16_t e = (int16_t)round(at);
-    return e;
+    //int16_t e = (int16_t)round(at);
+    return at;
 }
 
 
