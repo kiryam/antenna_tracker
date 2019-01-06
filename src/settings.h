@@ -8,20 +8,45 @@ typedef enum {
 	VERSION, // version should be first
 	SERIAL_BAUD,
 	GPS_BAUD,
+	TELEMETRY_BAUD,
+	TELEMETRY_TYPE,
+	TELEMETRY_FAKE,
+	TELEMETRY_FAKE_LAT,
+	TELEMETRY_FAKE_LON,
+	TELEMETRY_FAKE_ALT,
+	STEPPER_ENABLED,
+	SERVO_ENABLED,
+
 	UNKNOWN, // should be pre last
 	SETTING_COUNT // should be last
 } SETTING;
 
-static uint32_t SETTING_DEF[SETTING_COUNT-1] = {
-	2,
+static int32_t SETTING_DEF[SETTING_COUNT-1] = {
+	8,
 	115200,
 	9600,
+	57600,
+	0, // 0 - Mavlink, 1- LTM
+	1,
+	558940620,
+	372514570,
+	1000*10,
+	1,
+	1,
 };
 
 static char* SETTING_STR[SETTING_COUNT-1] = {
 	"version",
 	"serial_baud",
 	"gps_baud",
+	"telemetry_baud",
+	"telemetry_type",
+	"telemetry_fake",
+	"telemetry_fake_lat",
+	"telemetry_fake_lon",
+	"telemetry_fake_alt",
+	"stepper_enabled",
+	"servo_enabled",
 };
 
 

@@ -48,9 +48,9 @@
 #define TRACE_CHECKPOINT(string) vTracePrint(traceChn, string)
 
 #ifdef ENABLE_TELEMTRY
-	#define TELEMETRY_FAKE // define it to set fake telemetry values eg LON, LAT, alt; it will be updated after telemetry will be received
-	#ifdef TELEMETRY_FAKE
-		#define TELEMETRY_FAKE_ALT 1000*10 // 1000m
+	//#define TELEMETRY_FAKE // define it to set fake telemetry values eg LON, LAT, alt; it will be updated after telemetry will be received
+	//#ifdef TELEMETRY_FAKE
+	//	#define TELEMETRY_FAKE_ALT 1000*10 // 1000m
 
 		//#define TELEMETRY_FAKE_LAT 558444992
 		//#define TELEMETRY_FAKE_LON 373717152
@@ -59,14 +59,14 @@
 		//#define TELEMETRY_FAKE_LON 372232240
 
 		// yurlovo
-		#define TELEMETRY_FAKE_LAT 5589406200
-		#define TELEMETRY_FAKE_LON 3725145700
-	#endif
+	//	#define TELEMETRY_FAKE_LAT 5589406200
+	//	#define TELEMETRY_FAKE_LON 3725145700
+	//#endif
 #endif
 
 
 #ifdef ENABLE_GPS
-	#define GPS_FAKE
+	//#define GPS_FAKE
 	#ifdef GPS_FAKE
 		//Yurlovo
 		#define GPS_FAKE_LAT 558944890

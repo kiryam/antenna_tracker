@@ -12,7 +12,7 @@
 
 
 static GHandle ghContainerTelemetry, ghTelemetryRxGood, ghTelemetryRxBad, ghTelemetryPosLat, ghTelemetryPosLon;
-static GHandle ghContainerGPS, ghGPSLon, ghGPSLat, ghGPSAlt, ghHomeBearing;
+static GHandle ghContainerGPS, ghGPSLon, ghGPSLat, ghGPSAlt, ghHomeBearing, ghGPSSats;
 static GHandle ghContainerSystem, ghSystemHeapFree;
 static GHandle ghContainerServo, ghServoBearing, ghServoElevation, ghServoDist;
 static GHandle ghContainerServoTuning, ghServoBearingTuning;
@@ -188,6 +188,13 @@ void UIGPSInfoScreen() {
 	wi.g.parent = ghContainerGPS;
 	wi.g.width = gwinGetInnerWidth(ghContainerGPS);
 
+	wi.g.y = 0;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghGPSSats = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghGPSSats, 50, "Sats:");
+
 	wi.g.y = 12;
 	wi.g.x = 0;
 	wi.g.height = 12;
@@ -208,6 +215,7 @@ void UIGPSInfoScreen() {
 	wi.text = "0";
 	ghGPSAlt = gwinLabelCreate(NULL, &wi);
 	gwinLabelSetAttribute(ghGPSAlt, 50, "Alt:");
+
 
 	wi.g.y = 48;
 	wi.g.x = 0;
@@ -378,7 +386,7 @@ void switchScreen(bool forward){
 	}
 }
 
-#define INTCACHE_SIZE 4
+#define INTCACHE_SIZE 5
 int32_t intCache[INTCACHE_SIZE];
 
 void gwinSetIntCached(uint16_t cache_bank, GHandle gh, int32_t value, bool_t useAlloc){
@@ -432,7 +440,8 @@ void InfoScreenRender(){
 		gwinSetDegE7Cached(0, ghGPSLat, gps.lat, TRUE);
 		gwinSetDegE7Cached(1, ghGPSLon, gps.lon, TRUE);
 		gwinSetIntCached(2, ghGPSAlt, gps.alt, TRUE);
-		gwinSetIntCached(3, ghHomeBearing, home_bearing, TRUE);
+		gwinSetIntCached(3, ghGPSSats, gps.sats, TRUE);
+		gwinSetIntCached(4, ghHomeBearing, home_bearing, TRUE);
 	} else if (active_screen == SCREEN_SERVO) {
 		gwinSetIntCached(0, ghServoBearing, Bearing, TRUE);
 		gwinSetIntCached(1, ghServoElevation, Elevation, TRUE);

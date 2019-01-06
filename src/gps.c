@@ -130,6 +130,7 @@ int gpsInit(){
 
 void USART3_IRQHandler(){
 	if(USART_GetITStatus(GPS_USART, USART_IT_RXNE) != RESET) {
+		USART_ClearITPendingBit(GPS_USART, USART_IT_RXNE);
 		uint16_t cIn;
 		BaseType_t xHigherPriorityTaskWoken;
 
@@ -139,11 +140,9 @@ void USART3_IRQHandler(){
 			xQueueSendFromISR( gpsRxQueue, &cIn, &xHigherPriorityTaskWoken );
 		} while( USART_GetFlagStatus(GPS_USART, USART_FLAG_RXNE) );
 
-		USART_ClearITPendingBit(GPS_USART, USART_IT_RXNE);
-
-		if( xHigherPriorityTaskWoken ) {
-			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-		}
+		//if( xHigherPriorityTaskWoken ) {
+		//	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		//}
 	}
 }
 
@@ -173,6 +172,8 @@ void vGPSTimerCallback(TimerHandle_t pxTimer) {
 							gps.lat = minmea_tocoord(&rmc_frame.latitude)*10000000;
 							gps.lon = minmea_tocoord(&rmc_frame.longitude)*10000000;
 							gps.alt = frame_gga.altitude.value;
+							gps.sats = frame_gga.satellites_tracked;
+
 						#endif
 					}
 					break;
@@ -189,14 +190,17 @@ void vGPSTimerCallback(TimerHandle_t pxTimer) {
 				case MINMEA_SENTENCE_GSV: {
 					if (minmea_parse_gsv(&frame_gsv, line)) {
 						if (gps_log_enable ) {
-							INFO("$GSV: message %d of %d", frame_gsv.msg_nr, frame_gsv.total_msgs);
-							INFO("$GSV: sattelites in view: %d", frame_gsv.total_sats);
-							for (int i = 0; i < 4; i++)
+							//INFO("$GSV: message %d of %d", frame_gsv.msg_nr, frame_gsv.total_msgs);
+							if (frame_gsv.msg_nr == 1){
+								INFO("$GSV: sattelites in view: %d", frame_gsv.total_sats);
+							}
+							/*for (int i = 0; i < 4; i++)
 								INFO("$GSV: sat nr %d, elevation: %d, azimuth: %d, snr: %d dbm",
 									frame_gsv.sats[i].nr,
 									frame_gsv.sats[i].elevation,
 									frame_gsv.sats[i].azimuth,
 									frame_gsv.sats[i].snr);
+									*/
 							}
 					}
 					break;

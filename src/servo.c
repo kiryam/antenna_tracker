@@ -6,6 +6,7 @@
 #include "timers.h"
 #include "tracking.h"
 #include "stdlib.h"
+#include "settings.h"
 
 static TimerHandle_t servoTimer = NULL;
 static float servoCurrentAnglie;
@@ -66,6 +67,8 @@ void vServoTimerCallback(TimerHandle_t pxTimer){
 }
 
 void ServoSetPos(float angile) {
+	if (settingsGetInt32(SERVO_ENABLED) == 0) return;
+
 	#if SERVO_FLIP == 0
 		TIM2->CCR1 = map(angile, SERVO_MIN_ANGILE, SERVO_MAX_ANGILE, SERVO_MIN_PULSE, SERVO_MAX_PULSE);
 	#else

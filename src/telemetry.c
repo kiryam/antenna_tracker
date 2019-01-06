@@ -8,6 +8,7 @@
 
 #include "common/mavlink.h"
 #include "LightTelemetry.h"
+#include "settings.h"
 
 //#define DEBUG_MAVLINK
 #define TELEMETRY_USART USART1
@@ -36,14 +37,14 @@ TelemetryStats telemetry;
 int InitTelemetry(){
 	TRACE_CHECKPOINT("telemetry init");
 	telemetry.status = TELEMETRY_UNKNOWN;
-	telemetryType = TELEMETRY_LTM;
-	#ifdef TELEMETRY_FAKE
-		telemetry.alt = TELEMETRY_FAKE_ALT;
-		telemetry.lat = TELEMETRY_FAKE_LAT;
-		telemetry.lon = TELEMETRY_FAKE_LON;
+	telemetryType = settingsGetInt32(TELEMETRY_TYPE);
+	if (settingsGetInt32(TELEMETRY_FAKE) > 0 ){
+		telemetry.alt = settingsGetInt32(TELEMETRY_FAKE_ALT);
+		telemetry.lat = settingsGetInt32(TELEMETRY_FAKE_LAT);
+		telemetry.lon = settingsGetInt32(TELEMETRY_FAKE_LON);
 		telemetry.status = TELEMETRY_OK;
 		WARN("Telemetry fake parameters set");
-	#endif
+	}
 
 	telemetryRxQueue = xQueueCreate( TELEMETRY_QUEUE_LEN, sizeof( uint16_t ) );
 	if( telemetryRxQueue == NULL ) {
@@ -64,7 +65,7 @@ int InitTelemetry(){
 	GPIO_Init(GPIOA, &gpio_port1);
 
 	USART_InitTypeDef usart;
-	usart.USART_BaudRate = 57600;
+	usart.USART_BaudRate = settingsGetInt32(TELEMETRY_BAUD);;
 	usart.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	usart.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	usart.USART_Parity = USART_Parity_No;

@@ -9,6 +9,7 @@
 #include "gui.h"
 #include "timers.h"
 #include "stepper.h"
+#include "settings.h"
 
 #define STEPPER_DIR GPIO_Pin_11
 #define STEPPER_STEP GPIO_Pin_12
@@ -108,6 +109,7 @@ void vStepperTimerCallback(TimerHandle_t pxTimer){
 }
 
 void pointTo(float angile){
+	if (settingsGetInt32(STEPPER_ENABLED) == 0) return;
 	TRACE_CHECKPOINT("POINT TO START");
 	float diff = angile-currentAngile;
 

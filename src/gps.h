@@ -17,6 +17,7 @@ typedef struct __GPS_STATUS {
 	int32_t lon;
 	int32_t lat;
 	int32_t alt;
+	uint16_t sats;
 } GPSStatus;
 
 extern GPSStatus gps;
