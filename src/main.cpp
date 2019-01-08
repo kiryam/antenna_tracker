@@ -51,7 +51,7 @@ void vMoveTimerCallback(TimerHandle_t pxTimer);
 #endif
 
 #ifdef ENABLE_GUI
-	#include "gui.h"
+	#include "gui/gui.h"
 #endif
 
 #ifdef ENABLE_TRACKING

@@ -6,7 +6,7 @@
 #include "compass.h"
 #include "stdlib.h"
 #include "tracking.h"
-#include "gui.h"
+#include "gui/gui.h"
 #include "timers.h"
 #include "stepper.h"
 #include "settings.h"

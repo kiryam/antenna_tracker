@@ -5,7 +5,7 @@
 #include "stdbool.h"
 #include "main.h"
 #include "timers.h"
-#include "gui.h"
+#include "gui/gui.h"
 
 bool btn1;
 bool btn2;
