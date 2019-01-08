@@ -1,8 +1,8 @@
 #include "servo.h"
-
-#include "gfx.h"
-#include "../controls.h"
 #include "gui.h"
+#include "gfx.h"
+
+#include "../controls.h"
 #include "../tracking.h"
 #include "../stepper.h"
 
@@ -13,10 +13,12 @@ static char tmp[32] ={0};
 static GHandle ghContainerServoTuning;
 
 void ServoTuningScreenRender(){
+	UIServoTuningScreen();
+
 	if( btn2 ){
 		btn2 = false;
-		renderer = RENDER_INFO;
-		switchScreen(encoder_value);
+		//renderer = RENDER_INFO;
+		//switchScreen(encoder_value);
 		return;
 	}
 

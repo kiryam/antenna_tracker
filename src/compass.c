@@ -5,33 +5,16 @@
 #include "semphr.h"
 #include "math.h"
 
-//void CompassReadTask(void *pvParameters);
 static float declinationAngle;
 
 int InitCompass() {
 	TRACE_CHECKPOINT("compass init");
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
-	GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
-
 	HMC5883L_I2C_Init();
-	//HMC5883L_Initialize();
-
-	// write MODE register
-
 	HMC5883L_SetMode(HMC5883L_MODE_CONTINUOUS);
-	// // 10k continious mode
-	//    HMC5883L_I2C_ByteWrite(HMC5883L_DEFAULT_ADDRESS, &buf, HMC5883L_MODE_REG);
-	//    HMC5883L_I2C_ByteWrite(HMC5883L_DEFAULT_ADDRESS, &buf, HMC5883L_CONF_REGB);
-//	vTaskDelay(1000);
-
 	if ( !HMC5883L_TestConnection() ) {
 		return 1;
 	}
 
-	//if ( xTaskCreate(CompassReadTask, "compassReadTask", configMINIMAL_STACK_SIZE, &ucParameterToPass, tskIDLE_PRIORITY, &xHandle ) != pdTRUE ){
-	//	return 1;
-	//}
 	TRACE_CHECKPOINT("compass done");
 	return 0;
 }

@@ -126,6 +126,14 @@ int main(int argc, char* argv[]) {
 		}
 	#endif
 
+	#ifdef ENABLE_TRACKING
+		if (InitTracking() != 0 ) {
+			ERROR("Tracking init error");
+		} else {
+			INFO("Tracking init done");
+		}
+	#endif
+
 	#ifdef ENABLE_GUI
 		TaskHandle_t xHandle = NULL;
 		uint8_t ucParameterToPass;
@@ -137,21 +145,13 @@ int main(int argc, char* argv[]) {
 	#endif
 
 
-	#ifdef ENABLE_TRACKING
-		if (InitTracking() != 0 ) {
-			ERROR("Tracking init error");
-		} else {
-			INFO("Tracking init done");
-		}
-	#endif
-
-	#ifdef ENABLE_CONTROLS
-		if (InitControls() != 0 ) {
-			ERROR("Controls init error");
-		}else {
-			INFO("Controls init done");
-		}
-	#endif
+	//#ifdef ENABLE_CONTROLS
+	//	if (InitControls() != 0 ) {
+	//		ERROR("Controls init error");
+	//	}else {
+	//		INFO("Controls init done");
+	//	}
+	//#endif
 
 	TimerHandle_t moveTimer = xTimerCreate( "moveTimer", 1000 ,pdFALSE,0, vMoveTimerCallback);
 	if (moveTimer == NULL) {

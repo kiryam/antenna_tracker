@@ -16,10 +16,6 @@
 #define SSD1306_SH1106          TRUE
 
 static GFXINLINE void init_board(GDisplay *g) {
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
-	GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
-
 	g->board = 0;
 	switch(g->controllerdisplay) {
 	case 0:
@@ -58,8 +54,6 @@ static GFXINLINE void setpin_reset(GDisplay *g, bool_t state) {
 
 static GFXINLINE void acquire_bus(GDisplay *g) {
 	xSemaphoreTake( I2C_mtx, portMAX_DELAY );
-
-
 	(void) g;
 }
 
@@ -100,10 +94,9 @@ static GFXINLINE void write_cmd(GDisplay *g, uint8_t cmd) {
 static GFXINLINE void write_data(GDisplay *g, uint8_t* data, uint16_t length) {
 	(void) g;
 
-	uint8_t i;
 	ssd1306_I2C_Start();
 	ssd1306_I2C_WriteData(0x40);
-	for (i = 0; i < length; i++) {
+	for (uint8_t i = 0; i < length; i++) {
 		ssd1306_I2C_WriteData(data[i]);
 	}
 	ssd1306_I2C_Stop();

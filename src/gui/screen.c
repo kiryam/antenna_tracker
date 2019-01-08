@@ -1,12 +1,11 @@
+#include "main.h"
 #include "screen.h"
-
 #include "gfx.h"
 #include "gui.h"
 #include <stdbool.h>
 #include "../controls.h"
 #include "../telemetry.h"
 #include "../gps.h"
-#include "main.h"
 #include "../tracking.h"
 
 static GWidgetInit wi;
@@ -14,8 +13,53 @@ static GHandle ghContainerTelemetry, ghTelemetryRxGood, ghTelemetryRxBad, ghTele
 static GHandle ghContainerGPS, ghGPSLon, ghGPSLat, ghGPSAlt, ghHomeBearing, ghGPSSats;
 static GHandle ghContainerSystem, ghSystemHeapFree;
 static GHandle ghContainerServo, ghServoBearing, ghServoElevation, ghServoDist;
+void switchScreen(bool forward);
 
+void ScreenCreate(){
+	active_screen = SCREEN_ENUM_LEN;
+	switchScreen(true);
+}
 
+void ScreenDestroy(){
+
+}
+
+void ScreenRender(){
+	GEvent *event = geventEventWait(&gl, 50);
+	if ( event->type == GEVENT_TOGGLE ){
+		switch( ((GEventToggle*)event)->instance) {
+		case 0:
+			switchScreen(true);
+			break;
+		case 1:
+			cleanScreen();
+			// TODO
+			//renderer = RENDER_SERVO_TUNING;
+			return;
+		}
+	}
+
+	if (active_screen == SCREEN_TELEMETRY ){
+		gwinSetIntCached(0, ghTelemetryRxGood, telemetry.rx_good, TRUE);
+		gwinSetIntCached(1, ghTelemetryRxBad, telemetry.rx_bad, TRUE);
+		gwinSetDegE7Cached(2, ghTelemetryPosLat, telemetry.lat, TRUE);
+		gwinSetDegE7Cached(3, ghTelemetryPosLon, telemetry.lon, TRUE);
+	} else if (active_screen == SCREEN_SYSTEM ){
+		gwinSetIntCached(0, ghSystemHeapFree, xPortGetFreeHeapSize(), TRUE);
+	} else if (active_screen == SCREEN_SYSTEM ){
+		gwinSetIntCached(0,ghSystemHeapFree, xPortGetFreeHeapSize(), TRUE);
+	} else if (active_screen == SCREEN_GPS ){
+		gwinSetDegE7Cached(0, ghGPSLat, gps.lat, TRUE);
+		gwinSetDegE7Cached(1, ghGPSLon, gps.lon, TRUE);
+		gwinSetIntCached(2, ghGPSAlt, gps.alt, TRUE);
+		gwinSetIntCached(3, ghGPSSats, gps.sats, TRUE);
+		gwinSetIntCached(4, ghHomeBearing, home_bearing, TRUE);
+	} else if (active_screen == SCREEN_SERVO) {
+		gwinSetIntCached(0, ghServoBearing, Bearing, TRUE);
+		gwinSetIntCached(1, ghServoElevation, Elevation, TRUE);
+		gwinSetIntCached(2, ghServoDist, home_dist, TRUE);
+	}
+}
 
 void UITelemetryScreen(){
 	gwinWidgetClearInit(&wi);
@@ -47,7 +91,6 @@ void UITelemetryScreen(){
 	wi.text = "0";
 	ghTelemetryRxBad = gwinLabelCreate(NULL, &wi);
 	gwinLabelSetAttribute(ghTelemetryRxBad, 40, "Error:");
-
 
 	wi.g.y = 24;
 	wi.g.x = 0;
@@ -133,7 +176,6 @@ void UIGPSInfoScreen() {
 	ghGPSAlt = gwinLabelCreate(NULL, &wi);
 	gwinLabelSetAttribute(ghGPSAlt, 50, "Alt:");
 
-
 	wi.g.y = 48;
 	wi.g.x = 0;
 	wi.g.height = 12;
@@ -181,31 +223,39 @@ void UIServoScreen(){
 }
 
 
+Page* CreateScreenPage(){
+	Page* page = pvPortMalloc(sizeof(Page));
+	if( page == NULL ){
+		return NULL;
+	}
+	page->Render = ScreenRender;
+	page->Create = ScreenCreate;
+	page->Destroy = ScreenDestroy;
+	return page;
+}
 
 void cleanScreen(){
 	UIDestroyContainerWithChilds(ghContainerSystem);
 	UIDestroyContainerWithChilds(ghContainerGPS);
 	UIDestroyContainerWithChilds(ghContainerTelemetry);
 	UIDestroyContainerWithChilds(ghContainerServo);
-	//UIDestroyContainerWithChilds(ghContainerServoTuning);
 }
 
 void switchScreen(bool forward){
+	cleanScreen();
 	if ( forward ) {
-		screen_i++;
-		if ( screen_i >= sizeof(screen_sequence) ){
-			screen_i = 0;
+		active_screen++;
+		if ( active_screen >= SCREEN_ENUM_LEN ){
+			active_screen = 0;
 		}
 	}else{
-		screen_i--;
-		if ( screen_i >= sizeof(screen_sequence) ){
-			screen_i = sizeof(screen_sequence)-1;
+		active_screen--;
+		if ( active_screen >= SCREEN_ENUM_LEN ){
+			active_screen = SCREEN_ENUM_LEN-1;
 		}
 	}
 	//last_encoder_value = encoder_value;
 
-	cleanScreen();
-	active_screen = screen_sequence[screen_i];
 	if (active_screen == SCREEN_TELEMETRY ){
 		UITelemetryScreen();
 	}else if (active_screen == SCREEN_SYSTEM ){
@@ -216,49 +266,3 @@ void switchScreen(bool forward){
 		UIServoScreen();
 	}
 }
-
-
-void InfoScreenRender(){
-	if( firstTimeRendered == false ){ // just create screen
-		switchScreen(true);
-		firstTimeRendered = true;
-	}
-
-	GEvent* pe = geventEventWait(&gl, TIME_INFINITE);
-
-	if( btn2 ){
-		btn2 = false;
-		renderer = RENDER_SERVO_TUNING;
-		cleanScreen();
-		UIServoTuningScreen();
-		return;
-	}
-
-	if (btn1 ){
-		switchScreen(true);
-		//last_encoder_value = encoder_value;
-		btn1 = false;
-	}
-
-	if (active_screen == SCREEN_TELEMETRY ){
-		gwinSetIntCached(0, ghTelemetryRxGood, telemetry.rx_good, TRUE);
-		gwinSetIntCached(1, ghTelemetryRxBad, telemetry.rx_bad, TRUE);
-		gwinSetDegE7Cached(2, ghTelemetryPosLat, telemetry.lat, TRUE);
-		gwinSetDegE7Cached(3, ghTelemetryPosLon, telemetry.lon, TRUE);
-	} else if (active_screen == SCREEN_SYSTEM ){
-		gwinSetIntCached(0, ghSystemHeapFree, xPortGetFreeHeapSize(), TRUE);
-	} else if (active_screen == SCREEN_SYSTEM ){
-		gwinSetIntCached(0,ghSystemHeapFree, xPortGetFreeHeapSize(), TRUE);
-	} else if (active_screen == SCREEN_GPS ){
-		gwinSetDegE7Cached(0, ghGPSLat, gps.lat, TRUE);
-		gwinSetDegE7Cached(1, ghGPSLon, gps.lon, TRUE);
-		gwinSetIntCached(2, ghGPSAlt, gps.alt, TRUE);
-		gwinSetIntCached(3, ghGPSSats, gps.sats, TRUE);
-		gwinSetIntCached(4, ghHomeBearing, home_bearing, TRUE);
-	} else if (active_screen == SCREEN_SERVO) {
-		gwinSetIntCached(0, ghServoBearing, Bearing, TRUE);
-		gwinSetIntCached(1, ghServoElevation, Elevation, TRUE);
-		gwinSetIntCached(2, ghServoDist, home_dist, TRUE);
-	}
-}
-

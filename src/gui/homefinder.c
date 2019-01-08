@@ -8,10 +8,10 @@ static GHandle ghContainerHomeFinder;
 static GWidgetInit wi;
 
 void HomeFinderRender(){
-	if( firstTimeRendered == false ){ // just create screen
-		UIHomeFinerScreen();
-		firstTimeRendered = true;
-	}
+	//if( firstTimeRendered == false ){ // just create screen
+	//	UIHomeFinerScreen();
+	//	firstTimeRendered = true;
+	//}
 
 	gwinSetIntCached(0, ghHomeFinderCompass, home_bearing, TRUE);
 }

@@ -18,47 +18,46 @@ int InitControls(){
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
-	NVIC_InitTypeDef NVIC_InitStructure;
-	EXTI_InitTypeDef EXTI_InitStruct;
+	//EXTI_InitTypeDef EXTI_InitStruct;
 
-	GPIO_InitTypeDef gpio_port;
-	GPIO_StructInit(&gpio_port);
-	gpio_port.GPIO_Pin   = GPIO_Pin_4;
-	gpio_port.GPIO_Mode  = GPIO_Mode_IPU;
-	gpio_port.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &gpio_port);
+	//GPIO_InitTypeDef gpio_port;
+	//GPIO_StructInit(&gpio_port);
+	//gpio_port.GPIO_Pin   = GPIO_Pin_4;
+	//gpio_port.GPIO_Mode  = GPIO_Mode_IPU;
+	//gpio_port.GPIO_Speed = GPIO_Speed_50MHz;
+	//GPIO_Init(GPIOA, &gpio_port);
 
-	EXTI_StructInit(&EXTI_InitStruct);
-	EXTI_InitStruct.EXTI_Line = EXTI_Line4;
-	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-	EXTI_Init(&EXTI_InitStruct);
+	//EXTI_StructInit(&EXTI_InitStruct);
+	//EXTI_InitStruct.EXTI_Line = EXTI_Line4;
+	//EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	//EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	//EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	//EXTI_Init(&EXTI_InitStruct);
 
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI4_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_LOWEST_INTERRUPT_PRIORITY-1;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+	//NVIC_InitStructure.NVIC_IRQChannel = EXTI4_IRQn;
+	//NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_LOWEST_INTERRUPT_PRIORITY-1;
+	//NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	//NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	//NVIC_Init(&NVIC_InitStructure);
 
-	GPIO_StructInit(&gpio_port);
-	gpio_port.GPIO_Pin   = GPIO_Pin_1;
-	gpio_port.GPIO_Mode  = GPIO_Mode_IPU;
-	gpio_port.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &gpio_port);
+	//GPIO_StructInit(&gpio_port);
+	//gpio_port.GPIO_Pin   = GPIO_Pin_1;
+	//gpio_port.GPIO_Mode  = GPIO_Mode_IPU;
+	//gpio_port.GPIO_Speed = GPIO_Speed_50MHz;
+	//GPIO_Init(GPIOA, &gpio_port);
 
-	EXTI_StructInit(&EXTI_InitStruct);
-	EXTI_InitStruct.EXTI_Line = EXTI_Line1;
-	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-	EXTI_Init(&EXTI_InitStruct);
+	//EXTI_StructInit(&EXTI_InitStruct);
+	//EXTI_InitStruct.EXTI_Line = EXTI_Line1;
+	//EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	//EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	//EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	//EXTI_Init(&EXTI_InitStruct);
 
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_LOWEST_INTERRUPT_PRIORITY-1;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+	//NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn;
+	//NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_LOWEST_INTERRUPT_PRIORITY-1;
+	//NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	//NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	//NVIC_Init(&NVIC_InitStructure);
 
 	TIM_TimeBaseInitTypeDef timer3;
 	TIM_TimeBaseStructInit(&timer3);
@@ -70,6 +69,7 @@ int InitControls(){
 	TIM_ClearITPendingBit(TIM3,  TIM_IT_Update);
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 
+	NVIC_InitTypeDef NVIC_InitStructure;
 	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_LOWEST_INTERRUPT_PRIORITY-1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
@@ -98,7 +98,7 @@ extern "C" {
 		 }
 	}
 
-	void EXTI4_IRQHandler(){
+	/*void EXTI4_IRQHandler(){
 		if (EXTI_GetITStatus(EXTI_Line4) != RESET) {
 			if ( GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_4) == Bit_RESET ) {
 				btn2 = true;
@@ -123,7 +123,7 @@ extern "C" {
 			//}
 			EXTI_ClearITPendingBit(EXTI_Line1);
 		}
-	}
+	}*/
 #ifdef __cplusplus
 }
 #endif

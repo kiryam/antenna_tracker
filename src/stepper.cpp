@@ -88,7 +88,7 @@ int StepperInit() {
 
 int resetHome(){
 	GetHomeBearing();
-	renderer = RENDER_HOME_FINDING;
+	//renderer = RENDER_HOME_FINDING;
 
 	if ( xTimerStart(stepperTimer,  ( TickType_t ) 10) == pdFAIL ) {
 		ERROR("Failed to start stepperTimer");
@@ -98,7 +98,7 @@ int resetHome(){
 	// move until 0 degree;
 
 	currentAngile = 0;
-	renderer = RENDER_INFO;
+	//renderer = RENDER_INFO;
 
 	return 0;
 }

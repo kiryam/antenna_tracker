@@ -417,10 +417,15 @@ void HMC5883L_ReadBit(uint8_t slaveAddr, uint8_t regAddr, uint8_t bitNum, uint8_
  */
 void HMC5883L_I2C_Init()
 {
+	I2C_DeInit(I2C1);
+
     I2C_InitTypeDef I2C_InitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
 
     /* Enable I2C and GPIO clocks */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
+
     RCC_APB1PeriphClockCmd(HMC5883L_I2C_RCC_Periph, ENABLE);
     RCC_APB2PeriphClockCmd(HMC5883L_I2C_RCC_Port, ENABLE);
 

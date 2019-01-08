@@ -10,39 +10,32 @@
 #include "../controls.h"
 #include "../stepper.h"
 
-static font_t  font;
-bool firstTimeRendered;
-static enum activeRenderer last_renderer;
+#define INTCACHE_SIZE 5
+
 static void vUIRenderTimerCallback(TimerHandle_t pxTimer);
 TimerHandle_t guiTimer = NULL;
 GListener gl;
+static Page* currentPage;
+static bool pageCreated;
+int32_t intCache[INTCACHE_SIZE];
 
-enum activeRenderer renderer;
-
-
-TimerHandle_t screen_switch_timer;
-uint8_t screen_sequence[SCREEN_ENUM_LEN];
-uint8_t screen_i=0;
-static char tmp[32] ={0};
-
-#define SCREEN_SWITCH_TIMEOUT 3000
 
 void UIInitTask(void* pvParameters) {
     (void)pvParameters;
     gfxInit();
-    font = gdispOpenFont("UI2");
+    font_t font = gdispOpenFont("UI2");
 	gwinSetDefaultFont(font);
 
+	GSourceHandle upHandle = ginputGetToggle(0);
+	geventAttachSource(&gl, upHandle, GLISTEN_TOGGLE_ON);
+
+	GSourceHandle upHandle2 = ginputGetToggle(1);
+	geventAttachSource(&gl, upHandle2, GLISTEN_TOGGLE_ON);
+
 	geventListenerInit(&gl);
-	gwinAttachListener(&gl);
 
-	screen_sequence[0] = SCREEN_TELEMETRY;
-	screen_sequence[1] = SCREEN_GPS;
-	screen_sequence[2] = SCREEN_SYSTEM;
-	screen_sequence[3] = SCREEN_SERVO;
+	switchPage(CreateScreenPage());
 
-	screen_i= 3;
-	active_screen = screen_sequence[screen_i];
 
  	guiTimer = xTimerCreate( "guiTimer", 1000, pdTRUE,0, vUIRenderTimerCallback);
 	if (guiTimer == NULL) {
@@ -56,25 +49,35 @@ void UIInitTask(void* pvParameters) {
     vTaskDelete(NULL);
 }
 
+void switchPage(Page* page){
+	if(currentPage != NULL){
+		currentPage->Destroy();
+		vPortFree(currentPage);
+	}
+	currentPage = page;
+	pageCreated = false;
+}
+
 void vUIRenderTimerCallback(TimerHandle_t pxTimer){
 	(void) pxTimer;
 
-	if(renderer != last_renderer) {
-		firstTimeRendered = false;
-		last_renderer = renderer;
+	if (pageCreated == 0){
+		currentPage->Create();
+		pageCreated = true;
 	}
-	switch(renderer){
-		case RENDER_INFO:
-			InfoScreenRender();
-			break;
-		case RENDER_SERVO_TUNING:
-			ServoTuningScreenRender();
-			break;
+	currentPage->Render();
 
-		case RENDER_HOME_FINDING:
-			HomeFinderRender();
-			break;
-	}
+	//switch(renderer){
+	////	case RENDER_INFO:
+	//		InfoScreenRender();
+	//		break;
+	//	case RENDER_SERVO_TUNING:
+	//		ServoTuningScreenRender();
+	//		break;
+	//	case RENDER_HOME_FINDING:
+	//		HomeFinderRender();
+	//		break;
+	//}
 }
 
 void UIDestroyContainerWithChilds(GHandle gh){
@@ -127,14 +130,12 @@ void lat_to_char( int32_t degE7, char* buf ){
 	}
 }
 
-#define INTCACHE_SIZE 5
-int32_t intCache[INTCACHE_SIZE];
-
 void gwinSetIntCached(uint16_t cache_bank, GHandle gh, int32_t value, bool_t useAlloc){
 	if (intCache[cache_bank] == value ){
 		return;
 	}
 	intCache[cache_bank] = value;
+	char tmp[32] ={0};
 	itoa(value, tmp, 10);
 	gwinSetText(gh, tmp, useAlloc);
 }
@@ -144,6 +145,7 @@ void gwinSetDegE7Cached(uint16_t cache_bank, GHandle gh, int32_t value, bool_t u
 		return;
 	}
 	intCache[cache_bank] = value;
+	char tmp[32] ={0};
 	lat_to_char(value, tmp);
 	gwinSetText(gh, tmp, useAlloc);
 }
