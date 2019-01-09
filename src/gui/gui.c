@@ -9,6 +9,7 @@
 #include "../tracking.h"
 #include "../controls.h"
 #include "../stepper.h"
+#include "servo.h"
 
 #define INTCACHE_SIZE 5
 
@@ -19,6 +20,21 @@ static Page* currentPage;
 static bool pageCreated;
 int32_t intCache[INTCACHE_SIZE];
 
+static void gwPageEvent(void *param, GEvent *pe) {
+	if ( pe->type == GEVENT_TOGGLE ){
+		switch( ((GEventToggle*)pe)->instance) {
+		case 0:
+			break;
+		case 1:
+			if(currentPage->Page == PAGE_SCREEN ) {
+				switchPage(CreateServoTuningPage());
+			}else if(currentPage->Page == PAGE_SERVO_TUNING) {
+				switchPage(CreateScreenPage());
+			}
+			return;
+		}
+	}
+}
 
 void UIInitTask(void* pvParameters) {
     (void)pvParameters;
@@ -33,6 +49,8 @@ void UIInitTask(void* pvParameters) {
 	geventAttachSource(&gl, upHandle2, GLISTEN_TOGGLE_ON);
 
 	geventListenerInit(&gl);
+
+	geventRegisterCallback(&gl, gwPageEvent, 0);
 
 	switchPage(CreateScreenPage());
 

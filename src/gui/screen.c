@@ -21,7 +21,7 @@ void ScreenCreate(){
 }
 
 void ScreenDestroy(){
-
+	cleanScreen();
 }
 
 void ScreenRender(){
@@ -32,7 +32,7 @@ void ScreenRender(){
 			switchScreen(true);
 			break;
 		case 1:
-			cleanScreen();
+			//cleanScreen();
 			// TODO
 			//renderer = RENDER_SERVO_TUNING;
 			return;
@@ -228,6 +228,7 @@ Page* CreateScreenPage(){
 	if( page == NULL ){
 		return NULL;
 	}
+	page->Page = PAGE_SCREEN;
 	page->Render = ScreenRender;
 	page->Create = ScreenCreate;
 	page->Destroy = ScreenDestroy;

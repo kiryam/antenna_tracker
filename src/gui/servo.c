@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "servo.h"
 #include "gui.h"
 #include "gfx.h"
@@ -9,38 +11,11 @@
 static GWidgetInit wi;
 static GHandle ghServoBearingTuning;
 static int16_t last_encoder_value;
-static char tmp[32] ={0};
 static GHandle ghContainerServoTuning;
-
-void ServoTuningScreenRender(){
-	UIServoTuningScreen();
-
-	if( btn2 ){
-		btn2 = false;
-		//renderer = RENDER_INFO;
-		//switchScreen(encoder_value);
-		return;
-	}
-
-	if ( encoder_value != last_encoder_value ){
-		if (encoder_value > last_encoder_value) {
-			if( BearingTuning < 90 ){
-				BearingTuning = BearingTuning + STEPPER_MIN_ANGILE;
-			}
-		} else {
-			if (BearingTuning > -90 ) {
-				BearingTuning = BearingTuning - STEPPER_MIN_ANGILE;
-			}
-		}
-
-		last_encoder_value = encoder_value;
-	}
-	snprintf(tmp, 10, "%f", BearingTuning);
-	gwinSetText(ghServoBearingTuning, tmp, TRUE);
-}
+void ServoTuningRender();
 
 
-void UIServoTuningScreen(){
+void ServoTuningCreate(){
 	gwinWidgetClearInit(&wi);
 	wi.customDraw = 0;
 	wi.customParam = 0;
@@ -62,4 +37,47 @@ void UIServoTuningScreen(){
 	wi.text = "0";
 	ghServoBearingTuning = gwinLabelCreate(NULL, &wi);
 	gwinLabelSetAttribute(ghServoBearingTuning, 60, "BTuning:");
+}
+
+void ServoTuningDestroy(){
+
+}
+
+Page* CreateServoTuningPage(){
+	Page* page = pvPortMalloc(sizeof(Page));
+	if( page == NULL ){
+		return NULL;
+	}
+	page->Page = PAGE_SERVO_TUNING;
+	page->Render = ServoTuningRender;
+	page->Create = ServoTuningCreate;
+	page->Destroy = ServoTuningDestroy;
+	return page;
+}
+
+
+void ServoTuningRender(){
+	if( btn2 ){
+		btn2 = false;
+		//renderer = RENDER_INFO;
+		//switchScreen(encoder_value);
+		return;
+	}
+
+	if ( encoder_value != last_encoder_value ){
+		if (encoder_value > last_encoder_value) {
+			if( BearingTuning < 90 ){
+				BearingTuning = BearingTuning + STEPPER_MIN_ANGILE;
+			}
+		} else {
+			if (BearingTuning > -90 ) {
+				BearingTuning = BearingTuning - STEPPER_MIN_ANGILE;
+			}
+		}
+
+		last_encoder_value = encoder_value;
+	}
+	char tmp[32] ={0};
+	sprintf(tmp,"%f", BearingTuning);
+	gwinSetText(ghServoBearingTuning, tmp, TRUE);
 }

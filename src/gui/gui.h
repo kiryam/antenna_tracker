@@ -5,13 +5,14 @@
 #include <stdbool.h>
 #include "gfx.h"
 
-enum activeRenderer{
-	RENDER_INFO,
-	RENDER_SERVO_TUNING,
-	RENDER_HOME_FINDING
+enum PageEnum{
+	PAGE_SCREEN,
+	PAGE_SERVO_TUNING,
+	PAGE_HOME_FINDING
 };
 
 typedef struct __Page {
+	enum PageEnum Page;
 	void (*Create)   ();
 	void (*Render)   ();
 	void (*Destroy)   ();
