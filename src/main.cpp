@@ -58,10 +58,6 @@ void vMoveTimerCallback(TimerHandle_t pxTimer);
 	#include "tracking.h"
 #endif
 
-#ifdef ENABLE_CONTROLS
-	#include "controls.h"
-#endif
-
 int main(int argc, char* argv[]) {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 

@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "main.h"
 #include "gui.h"
 #include "FreeRTOS.h"
@@ -7,7 +8,6 @@
 #include "../telemetry.h"
 #include "../gps.h"
 #include "../tracking.h"
-#include "../controls.h"
 #include "../stepper.h"
 #include "servo.h"
 
@@ -15,7 +15,7 @@
 
 static void vUIRenderTimerCallback(TimerHandle_t pxTimer);
 TimerHandle_t guiTimer = NULL;
-GListener gl;
+static GListener gl;
 static Page* currentPage;
 static bool pageCreated;
 int32_t intCache[INTCACHE_SIZE];
@@ -42,18 +42,13 @@ void UIInitTask(void* pvParameters) {
     font_t font = gdispOpenFont("UI2");
 	gwinSetDefaultFont(font);
 
-	GSourceHandle upHandle = ginputGetToggle(0);
-	geventAttachSource(&gl, upHandle, GLISTEN_TOGGLE_ON);
-
 	GSourceHandle upHandle2 = ginputGetToggle(1);
 	geventAttachSource(&gl, upHandle2, GLISTEN_TOGGLE_ON);
 
 	geventListenerInit(&gl);
-
 	geventRegisterCallback(&gl, gwPageEvent, 0);
 
 	switchPage(CreateScreenPage());
-
 
  	guiTimer = xTimerCreate( "guiTimer", 1000, pdTRUE,0, vUIRenderTimerCallback);
 	if (guiTimer == NULL) {

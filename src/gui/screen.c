@@ -3,7 +3,6 @@
 #include "gfx.h"
 #include "gui.h"
 #include <stdbool.h>
-#include "../controls.h"
 #include "../telemetry.h"
 #include "../gps.h"
 #include "../tracking.h"
@@ -13,32 +12,38 @@ static GHandle ghContainerTelemetry, ghTelemetryRxGood, ghTelemetryRxBad, ghTele
 static GHandle ghContainerGPS, ghGPSLon, ghGPSLat, ghGPSAlt, ghHomeBearing, ghGPSSats;
 static GHandle ghContainerSystem, ghSystemHeapFree;
 static GHandle ghContainerServo, ghServoBearing, ghServoElevation, ghServoDist;
+static GListener gl;
+static GSourceHandle upHandle;
 void switchScreen(bool forward);
+void cleanScreen();
+
+static void gwScreenEvent(void *param, GEvent *pe) {
+	if ( pe->type == GEVENT_TOGGLE ){
+		switch( ((GEventToggle*)pe)->instance) {
+		case 0:
+			switchScreen(true);
+			break;
+		}
+	}
+}
 
 void ScreenCreate(){
 	active_screen = SCREEN_ENUM_LEN;
 	switchScreen(true);
+	upHandle = ginputGetToggle(0);
+	geventListenerInit(&gl);
+	geventAttachSource(&gl, upHandle, GLISTEN_TOGGLE_ON);
+	geventRegisterCallback(&gl, gwScreenEvent, 0);
 }
 
 void ScreenDestroy(){
 	cleanScreen();
+	geventDetachSourceListeners(upHandle);
+	geventDetachSource(&gl, upHandle);
+	vSemaphoreDelete(gl.waitqueue);
 }
 
 void ScreenRender(){
-	GEvent *event = geventEventWait(&gl, 50);
-	if ( event->type == GEVENT_TOGGLE ){
-		switch( ((GEventToggle*)event)->instance) {
-		case 0:
-			switchScreen(true);
-			break;
-		case 1:
-			//cleanScreen();
-			// TODO
-			//renderer = RENDER_SERVO_TUNING;
-			return;
-		}
-	}
-
 	if (active_screen == SCREEN_TELEMETRY ){
 		gwinSetIntCached(0, ghTelemetryRxGood, telemetry.rx_good, TRUE);
 		gwinSetIntCached(1, ghTelemetryRxBad, telemetry.rx_bad, TRUE);
@@ -46,8 +51,6 @@ void ScreenRender(){
 		gwinSetDegE7Cached(3, ghTelemetryPosLon, telemetry.lon, TRUE);
 	} else if (active_screen == SCREEN_SYSTEM ){
 		gwinSetIntCached(0, ghSystemHeapFree, xPortGetFreeHeapSize(), TRUE);
-	} else if (active_screen == SCREEN_SYSTEM ){
-		gwinSetIntCached(0,ghSystemHeapFree, xPortGetFreeHeapSize(), TRUE);
 	} else if (active_screen == SCREEN_GPS ){
 		gwinSetDegE7Cached(0, ghGPSLat, gps.lat, TRUE);
 		gwinSetDegE7Cached(1, ghGPSLon, gps.lon, TRUE);
@@ -255,7 +258,6 @@ void switchScreen(bool forward){
 			active_screen = SCREEN_ENUM_LEN-1;
 		}
 	}
-	//last_encoder_value = encoder_value;
 
 	if (active_screen == SCREEN_TELEMETRY ){
 		UITelemetryScreen();
