@@ -65,21 +65,25 @@ static void gwSettingsEvent(void *param, GEvent *pe){
 void StepperOff(){
 	settingsSetInt32(STEPPER_ENABLED, 0);
 	INFO("Stepper off");
+	switchPage(CreateSettingsPage(NULL));
 }
 
 void StepperOn(){
 	settingsSetInt32(STEPPER_ENABLED, 1);
 	INFO("Stepper on");
+	switchPage(CreateSettingsPage(NULL));
 }
 
 void ServoOff(){
 	settingsSetInt32(SERVO_ENABLED, 0);
 	INFO("Servo off");
+	switchPage(CreateSettingsPage(NULL));
 }
 
 void ServoOn(){
 	settingsSetInt32(SERVO_ENABLED, 1);
 	INFO("Servo on");
+	switchPage(CreateSettingsPage(NULL));
 }
 
 void StepperHandler(){
