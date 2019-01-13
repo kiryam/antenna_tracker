@@ -15,6 +15,7 @@ static TimerHandle_t cliTimer = NULL;
 
 void vCLITimerCallback(TimerHandle_t pxTimer);
 
+#if ( configUSE_TRACE_FACILITY == 1 )
 #ifdef COMMAND_TASKS
 	static BaseType_t prvTaskStatsCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString ) {
 		(void) xWriteBufferLen;
@@ -32,10 +33,13 @@ void vCLITimerCallback(TimerHandle_t pxTimer);
 		0
 	};
 #endif
+#endif
 
 int initCLI(){
+	#if ( configUSE_TRACE_FACILITY == 1 )
 	#ifdef COMMAND_TASKS
 		FreeRTOS_CLIRegisterCommand( &xTasksCommand );
+	#endif
 	#endif
 
 	cliTimer = xTimerCreate( "CLITimer",100,pdTRUE,0, vCLITimerCallback);

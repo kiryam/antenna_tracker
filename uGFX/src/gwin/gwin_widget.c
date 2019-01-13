@@ -647,9 +647,9 @@ bool_t gwinAttachListener(GListener *pl) {
 			return FALSE;
 
 		// Is this already done?
-		oi = wvmt->ToggleGet(gw, role);
-		if (instance == oi)
-			return TRUE;
+		//oi = wvmt->ToggleGet(gw, role);
+		//if (instance == oi)
+		//	return TRUE;
 
 		// Remove the old instance
 		if (oi != GWIDGET_NO_INSTANCE) {
@@ -704,16 +704,16 @@ bool_t gwinAttachListener(GListener *pl) {
 			return FALSE;
 
 		// Is this already done?
-		oi = wvmt->DialGet(gw, role);
-		if (instance == oi)
-			return TRUE;
+		//oi = wvmt->DialGet(gw, role);
+		//if (instance == oi)
+		//	return TRUE;
 
 		// Remove the old instance
-		if (oi != GWIDGET_NO_INSTANCE) {
-			wvmt->DialAssign(gw, role, GWIDGET_NO_INSTANCE);
-			if (!FindDialUser(oi))
-				geventDetachSource(&gl, ginputGetDial(oi));
-		}
+		///if (oi != GWIDGET_NO_INSTANCE) {
+		//	wvmt->DialAssign(gw, role, GWIDGET_NO_INSTANCE);
+		//	if (!FindDialUser(oi))
+		//		geventDetachSource(&gl, ginputGetDial(oi));
+		//}
 
 		// Assign the new
 		wvmt->DialAssign(gw, role, instance);

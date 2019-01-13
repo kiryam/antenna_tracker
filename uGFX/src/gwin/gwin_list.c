@@ -248,6 +248,25 @@ static void sendListEvent(GWidgetObject *gw, int item) {
 	}
 #endif
 
+static uint16_t encode_last_value;
+#if GINPUT_NEED_DIAL
+	static void ListDialAssign(GWidgetObject *gw, uint16_t role, uint16_t instance) {
+		if (role)
+			gw2obj->t_up = instance;
+		else
+			gw2obj->t_dn = instance;
+	}
+
+	static uint16_t ListDialGet(GWidgetObject *gw, uint16_t role) {
+		return role ? gw2obj->t_up : gw2obj->t_dn;
+	}
+
+	static void ListDialOn(GWidgetObject *gw, uint16_t role, uint16_t value, uint16_t max) {
+		ListToggleOn(gw, value < encode_last_value);
+		encode_last_value = value;
+	}
+#endif
+
 static void ListDestroy(GHandle gh) {
 	const gfxQueueASyncItem* qi;
 
@@ -289,10 +308,10 @@ static const gwidgetVMT listVMT = {
 	#endif
 	#if GINPUT_NEED_DIAL
 		{
-			0,
-			0,
-			0,
-			0,
+			1,
+			ListDialAssign,
+			ListDialGet,
+			ListDialOn,
 		},
 	#endif
 };
@@ -780,6 +799,7 @@ void gwinListDefaultDraw(GWidgetObject* gw, void* param) {
 	// Draw until we run out of room or items
 	for (y = 1-(gw2obj->top%iheight); y < gw->g.height-2 && qi; qi = gfxQueueASyncNext(qi), y += iheight) {
 		fill = (qi2li->flags & GLIST_FLG_SELECTED) ? ps->fill : gw->pstyle->background;
+
 		gdispGFillArea(gw->g.display, gw->g.x+1, gw->g.y+y, iwidth, iheight, fill);
 		#if GWIN_NEED_LIST_IMAGES
 			if ((gw->g.flags & GLIST_FLG_HASIMAGES)) {
@@ -797,7 +817,9 @@ void gwinListDefaultDraw(GWidgetObject* gw, void* param) {
 				}
 			}
 		#endif
-		gdispGFillStringBox(gw->g.display, gw->g.x+x+LST_HORIZ_PAD, gw->g.y+y, iwidth-LST_HORIZ_PAD, iheight, qi2li->text, gw->g.font, ps->text, fill, justifyLeft);
+
+		color_t textColor = (qi2li->flags & GLIST_FLG_SELECTED) ? ps->progress : ps->text;
+		gdispGFillStringBox(gw->g.display, gw->g.x+x+LST_HORIZ_PAD, gw->g.y+y, iwidth-LST_HORIZ_PAD, iheight, qi2li->text, gw->g.font, textColor, fill, justifyLeft);
 	}
 
 	// Fill any remaining item space

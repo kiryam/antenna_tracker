@@ -13,7 +13,8 @@ static GHandle ghContainerGPS, ghGPSLon, ghGPSLat, ghGPSAlt, ghHomeBearing, ghGP
 static GHandle ghContainerSystem, ghSystemHeapFree;
 static GHandle ghContainerServo, ghServoBearing, ghServoElevation, ghServoDist;
 static GListener gl;
-static GSourceHandle upHandle;
+static GSourceHandle upHandle,upHandle2;
+static uint16_t last_encoder_value;
 void switchScreen(bool forward);
 void cleanScreen();
 
@@ -21,18 +22,31 @@ static void gwScreenEvent(void *param, GEvent *pe) {
 	if ( pe->type == GEVENT_TOGGLE ){
 		switch( ((GEventToggle*)pe)->instance) {
 		case 0:
-			switchScreen(true);
+			switchPage(CreateSettingsPage());
 			break;
 		}
+	}else if( pe->type == GEVENT_DIAL) {
+		switch( ((GEventDial*)pe)->instance) {
+			case 0:
+				if ( ((GEventDial*)pe)->value != last_encoder_value ) {
+					switchScreen(((GEventDial*)pe)->value > last_encoder_value);
+					last_encoder_value = ((GEventDial*)pe)->value;
+				}
+				break;
+			}
 	}
 }
 
 void ScreenCreate(){
 	active_screen = SCREEN_ENUM_LEN;
 	switchScreen(true);
-	upHandle = ginputGetToggle(0);
 	geventListenerInit(&gl);
+	upHandle = ginputGetToggle(0);
 	geventAttachSource(&gl, upHandle, GLISTEN_TOGGLE_ON);
+
+	upHandle2 = ginputGetDial(0);
+	geventAttachSource(&gl, upHandle2, 0);
+
 	geventRegisterCallback(&gl, gwScreenEvent, 0);
 }
 
@@ -40,6 +54,9 @@ void ScreenDestroy(){
 	cleanScreen();
 	geventDetachSourceListeners(upHandle);
 	geventDetachSource(&gl, upHandle);
+
+	//geventDetachSourceListeners(upHandle2);
+	//geventDetachSource(&gl, upHandle2);
 	vSemaphoreDelete(gl.waitqueue);
 }
 
@@ -66,9 +83,6 @@ void ScreenRender(){
 
 void UITelemetryScreen(){
 	gwinWidgetClearInit(&wi);
-	wi.customDraw = 0;
-	wi.customParam = 0;
-	wi.customStyle = 0;
 
 	wi.g.show = TRUE;
 	wi.g.width = 126;
@@ -112,9 +126,6 @@ void UITelemetryScreen(){
 
 void UISystemInfoScreen(){
 	gwinWidgetClearInit(&wi);
-	wi.customDraw = 0;
-	wi.customParam = 0;
-	wi.customStyle = 0;
 
 	wi.g.show = TRUE;
 	wi.g.width = 126;
@@ -137,9 +148,6 @@ void UISystemInfoScreen(){
 
 void UIGPSInfoScreen() {
 	gwinWidgetClearInit(&wi);
-	wi.customDraw = 0;
-	wi.customParam = 0;
-	wi.customStyle = 0;
 
 	wi.g.show = TRUE;
 	wi.g.width = 126;
@@ -189,9 +197,6 @@ void UIGPSInfoScreen() {
 
 void UIServoScreen(){
 	gwinWidgetClearInit(&wi);
-	wi.customDraw = 0;
-	wi.customParam = 0;
-	wi.customStyle = 0;
 
 	wi.g.show = TRUE;
 	wi.g.width = 126;
@@ -243,6 +248,11 @@ void cleanScreen(){
 	UIDestroyContainerWithChilds(ghContainerGPS);
 	UIDestroyContainerWithChilds(ghContainerTelemetry);
 	UIDestroyContainerWithChilds(ghContainerServo);
+
+	ghContainerSystem = NULL;
+	ghContainerGPS = NULL;
+	ghContainerTelemetry = NULL;
+	ghContainerServo = NULL;
 }
 
 void switchScreen(bool forward){

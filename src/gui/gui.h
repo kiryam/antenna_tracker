@@ -8,14 +8,22 @@
 enum PageEnum{
 	PAGE_SCREEN,
 	PAGE_SERVO_TUNING,
-	PAGE_HOME_FINDING
+	PAGE_HOME_FINDING,
+	PAGE_SETTINGS
+};
+
+
+enum ButtonEnum{
+	BUTTON_ENTER,
+	BUTTON_ESC
 };
 
 typedef struct __Page {
 	enum PageEnum Page;
-	void (*Create)   ();
-	void (*Render)   ();
-	void (*Destroy)   ();
+	void (*Create)   (struct __Page* page);
+	void (*Render)  ();
+	void (*Destroy)  (struct __Page* page);
+	void* payload;
 } Page;
 
 #ifdef __cplusplus

@@ -37,6 +37,11 @@ static void gwServoEvent(void *param, GEvent *pe) {
 }
 
 void ServoTuningCreate(){
+	geventListenerInit(&gl);
+	upHandle = ginputGetDial(0);
+	geventAttachSource(&gl, upHandle, 0);
+	geventRegisterCallback(&gl, gwServoEvent, 0);
+
 	gwinWidgetClearInit(&wi);
 	wi.customDraw = 0;
 	wi.customParam = 0;
@@ -58,16 +63,12 @@ void ServoTuningCreate(){
 	wi.text = "0";
 	ghServoBearingTuning = gwinLabelCreate(NULL, &wi);
 	gwinLabelSetAttribute(ghServoBearingTuning, 60, "BTuning:");
-
-	geventListenerInit(&gl);
-	upHandle = ginputGetDial(0);
-	geventAttachSource(&gl, upHandle, 0);
-	geventRegisterCallback(&gl, gwServoEvent, 0);
 }
 
 void ServoTuningDestroy(){
 	UIDestroyContainerWithChilds(ghContainerServoTuning);
-	geventDetachSourceListeners(upHandle);
+	ghContainerServoTuning = NULL;
+	//geventDetachSourceListeners(upHandle);
 	geventDetachSource(&gl, upHandle);
 	vSemaphoreDelete(gl.waitqueue);
 }

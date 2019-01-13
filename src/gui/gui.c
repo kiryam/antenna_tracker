@@ -20,18 +20,19 @@ static Page* currentPage;
 static bool pageCreated;
 int32_t intCache[INTCACHE_SIZE];
 
+
 static void gwPageEvent(void *param, GEvent *pe) {
 	if ( pe->type == GEVENT_TOGGLE ){
 		switch( ((GEventToggle*)pe)->instance) {
-		case 0:
+		case BUTTON_ENTER:
 			break;
-		case 1:
+		case BUTTON_ESC:
 			if(currentPage->Page == PAGE_SCREEN ) {
 				switchPage(CreateServoTuningPage());
-			}else if(currentPage->Page == PAGE_SERVO_TUNING) {
+			}else if(currentPage->Page == PAGE_SERVO_TUNING || currentPage->Page == PAGE_SETTINGS) {
 				switchPage(CreateScreenPage());
 			}
-			return;
+			break;
 		}
 	}
 }
@@ -42,8 +43,8 @@ void UIInitTask(void* pvParameters) {
     font_t font = gdispOpenFont("UI2");
 	gwinSetDefaultFont(font);
 
-	GSourceHandle upHandle2 = ginputGetToggle(1);
-	geventAttachSource(&gl, upHandle2, GLISTEN_TOGGLE_ON);
+	GSourceHandle upHandle = ginputGetToggle(BUTTON_ESC);
+	geventAttachSource(&gl, upHandle, GLISTEN_TOGGLE_ON);
 
 	geventListenerInit(&gl);
 	geventRegisterCallback(&gl, gwPageEvent, 0);
@@ -63,8 +64,10 @@ void UIInitTask(void* pvParameters) {
 }
 
 void switchPage(Page* page){
+	if (page == NULL) return;
+
 	if(currentPage != NULL){
-		currentPage->Destroy();
+		currentPage->Destroy(currentPage);
 		vPortFree(currentPage);
 	}
 	currentPage = page;
@@ -75,22 +78,10 @@ void vUIRenderTimerCallback(TimerHandle_t pxTimer){
 	(void) pxTimer;
 
 	if (pageCreated == 0){
-		currentPage->Create();
+		currentPage->Create(currentPage);
 		pageCreated = true;
 	}
 	currentPage->Render();
-
-	//switch(renderer){
-	////	case RENDER_INFO:
-	//		InfoScreenRender();
-	//		break;
-	//	case RENDER_SERVO_TUNING:
-	//		ServoTuningScreenRender();
-	//		break;
-	//	case RENDER_HOME_FINDING:
-	//		HomeFinderRender();
-	//		break;
-	//}
 }
 
 void UIDestroyContainerWithChilds(GHandle gh){

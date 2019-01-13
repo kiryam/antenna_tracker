@@ -17,7 +17,7 @@ void ginput_lld_dial_init(void) {
 	timer3.TIM_Period = 1;
 	timer3.TIM_CounterMode = TIM_CounterMode_Down | TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM3, &timer3);
-	TIM_EncoderInterfaceConfig(TIM3, TIM_EncoderMode_TI1, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	TIM_EncoderInterfaceConfig(TIM3, TIM_EncoderMode_TI2, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	TIM_ClearITPendingBit(TIM3,  TIM_IT_Update);
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 

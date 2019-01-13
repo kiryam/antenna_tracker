@@ -1,22 +1,191 @@
+#include <stddef.h>
+#include <string.h>
 #include "settings.h"
+#include "../settings.h"
+#include "gui.h"
+#include "main.h"
+#include "menu.h"
 
+static GListener gl;
+static GSourceHandle upHandle;
+static uint16_t last_encoder_value;
+static GHandle ghContainerSettings, ghList1;
+//MenuItem* _activeMenu;
+void (*_itemHandlers[MAX_MENU_ITEMS_COUNT])(void);
 
-/*
-GWidgetInit	wi;
+const GWidgetStyle MyCustomStyle = {
+	Black,			// window background
+	Black,			// focused
 
-	// Apply some default values for GWIN
-	wi.customDraw = 0;
-	wi.customParam = 0;
-	wi.customStyle = 0;
-	wi.g.show = FALSE;
+	// enabled color set
+	{
+		White,		// text
+		White,		// edge
+		White,		// fill
+		Black		// progress - active area
+	},
 
-	// Apply the list parameters
-	wi.g.width = 200;
-	wi.g.height = 100;
-	wi.g.y = 10;
-	wi.g.x = 10;
+	// disabled color set
+	{
+		White,		// text
+		Black,		// edge
+		Black,		// fill
+		White		// progress - active area
+	},
+
+	// pressed color set
+	{
+		White,		// text
+		White,		// edge
+		White,		// fill
+		White		// progress - active area
+	}
+};
+static void gwSettingsEvent(void *param, GEvent *pe){
+	if ( pe->type == GEVENT_TOGGLE ){
+		switch( ((GEventToggle*)pe)->instance) {
+		case BUTTON_ENTER:
+			_itemHandlers[gwinListGetSelected(ghList1)]();
+			break;
+		case BUTTON_ESC:
+			break;
+		}
+	}else if( pe->type == GEVENT_DIAL) {
+		switch( ((GEventDial*)pe)->instance) {
+			case 0:
+				if ( ((GEventDial*)pe)->value != last_encoder_value ) {
+					last_encoder_value = ((GEventDial*)pe)->value;
+				}
+				break;
+			}
+	}
+}
+
+// HANDLERS
+void StepperOff(){
+	settingsSetInt32(STEPPER_ENABLED, 0);
+	INFO("Stepper off");
+}
+
+void StepperOn(){
+	settingsSetInt32(STEPPER_ENABLED, 1);
+	INFO("Stepper on");
+}
+
+void ServoOff(){
+	settingsSetInt32(SERVO_ENABLED, 0);
+	INFO("Servo off");
+}
+
+void ServoOn(){
+	settingsSetInt32(SERVO_ENABLED, 1);
+	INFO("Servo on");
+}
+
+void StepperHandler(){
+	MenuItem * m = MenuCreate(2);
+	if (m!= NULL){
+		MenuAddItem(m, "Stepper on", StepperOn);
+		MenuAddItem(m, "Stepper off", StepperOff);
+	}
+	switchPage(CreateSettingsPage(m));
+	INFO("Stepper settings");
+}
+
+void ServoHandler(){
+	MenuItem * m = MenuCreate(2);
+	if (m!= NULL){
+		MenuAddItem(m, "Servo on", ServoOn);
+		MenuAddItem(m, "Servo off", ServoOff);
+	}
+	switchPage(CreateSettingsPage(m));
+	INFO("Servo settings");
+}
+// --------
+
+void SettingsCreate(Page* page){
+	geventListenerInit(&gl);
+	gwinAttachListener(&gl);
+	geventRegisterCallback(&gl, gwSettingsEvent, 0);
+
+	upHandle = ginputGetToggle(BUTTON_ENTER);
+	geventAttachSource(&gl, upHandle, GLISTEN_TOGGLE_ON);
+
+	GWidgetInit	wi;
+	gwinWidgetClearInit(&wi);
+
+	wi.g.show = TRUE;
+	wi.g.width = 128;
+	wi.g.height = 64;
+	ghContainerSettings = gwinContainerCreate(0, &wi, 0);
+
+	gwinWidgetClearInit(&wi);
+	wi.customStyle = &MyCustomStyle;
+	wi.g.width = 126;
+	wi.g.height = 64;
 	wi.text = "List Name";
+	wi.g.parent = ghContainerSettings;
 
-	// Create the actual list
 	ghList1 = gwinListCreate(NULL, &wi, FALSE);
-*/
+	gwinListSetScroll(ghList1, scrollAuto);
+
+	if (!gwinAttachDial(ghList1, 0, 0) ){
+		ERROR("Failed to attach dial to list");
+	}
+
+	if (page->payload != NULL){
+		struct menuMeta* meta = MenuGetMeta(page->payload);
+		static MenuItem* ptr;
+		ptr = page->payload;
+		if (meta != NULL){
+			for (size_t i=0; i<meta->length;i++){
+				if(i>=MAX_MENU_ITEMS_COUNT) break;
+				_itemHandlers[gwinListAddItem(ghList1, ptr->Title, true)] = ptr->Handler;
+				ptr++;
+			}
+		}
+	}
+}
+
+void SettingsDestroy(struct __Page* page){
+	if (page->payload != NULL){
+		MenuDelete(page->payload);
+		page->payload = NULL;
+	}
+
+	geventDetachSourceListeners(upHandle);
+	geventDetachSource(&gl, upHandle);
+
+	vSemaphoreDelete(gl.waitqueue);
+
+	UIDestroyContainerWithChilds(ghContainerSettings);
+	ghContainerSettings = NULL;
+}
+
+void SettingsRender(){
+	gwinSetVisible(ghList1, TRUE);
+}
+
+Page* CreateSettingsPage(MenuItem *_menu){
+	Page* page = pvPortMalloc(sizeof(Page));
+	if( page == NULL ){
+		return NULL;
+	}
+
+	if (_menu == NULL){
+		MenuItem * m = MenuCreate(2);
+		if (m!= NULL){
+			MenuAddItem(m, "Stepper", StepperHandler);
+			MenuAddItem(m, "Servo", ServoHandler);
+			page->payload = m;
+		}
+	}else{
+		page->payload = _menu;
+	}
+
+	page->Page = PAGE_SETTINGS;
+	page->Render = SettingsRender;
+	page->Create = SettingsCreate;
+	page->Destroy = SettingsDestroy;
+	return page;
+}
