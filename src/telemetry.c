@@ -20,8 +20,10 @@ static mavlink_message_t message;
 static uint16_t cRxedChar;
 static uint8_t msgReceived = false;
 static TimerHandle_t telemetryTimer = NULL;
+static TimerHandle_t telemetryLoggerTimer = NULL;
 
 void vTelemetryTimerCallback(TimerHandle_t pxTimer);
+void vTelemetryLoggerTimerCallback(TimerHandle_t pxTimer);
 
 enum TelemetryType {
 	TELEMETRY_MAVLINK,
@@ -96,6 +98,16 @@ int InitTelemetry(){
 		return 1;
 	}
 
+	telemetryLoggerTimer = xTimerCreate( "telemetryTimer", 1000 ,pdTRUE,0, vTelemetryLoggerTimerCallback);
+	if (telemetryLoggerTimer == NULL) {
+		ERROR("Failed to create telemetryLoggerTimer");
+		return 1;
+	}
+	if ( xTimerStart(telemetryLoggerTimer,  ( TickType_t ) 100) == pdFAIL ) {
+		ERROR("Failed to start telemetryLoggerTimer");
+		return 1;
+	}
+
 	TRACE_CHECKPOINT("telemetry done");
 	return 0;
 }
@@ -120,6 +132,11 @@ void USART1_IRQHandler(){
 }
 
 static mavlink_status_t status;
+
+void vTelemetryLoggerTimerCallback(TimerHandle_t pxTimer){
+	(void)pxTimer;
+	INFO("UAV Pos %d, %d at %d cm", telemetry.lat, telemetry.lon, telemetry.alt);
+}
 
 void vTelemetryTimerCallback(TimerHandle_t pxTimer) {
 	(void)pxTimer;

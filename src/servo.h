@@ -13,6 +13,8 @@
 #define SERVO_90
 //#define SERVO_180
 
+#define SERVO_STEP_ANGILE 1
+
 #ifdef SERVO_90
 	#define SERVO_MAX_PULSE 190
 	#define SERVO_MIN_PULSE 80

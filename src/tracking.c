@@ -13,15 +13,20 @@
 
 #define sq(x) ((x)*(x))
 static float lonScaleDown=0.0;               // longitude scaling
+#define fabs(x) x<0?-x:x
+#define EARTH_RADIUS 6371000
+
 
 uint32_t home_dist;
 float Elevation;
 float Bearing;
 static bool tracking_log_enable;
 float BearingTuning;
+float ElevationTuning;
 TimerHandle_t trackerTimer = NULL;
 void vAntennaTrackingTimerCallback(TimerHandle_t pxTimer);
 void calc_longitude_scaling(int32_t lat);
+//void UITrackerTask(void* pvParameters);
 
 static BaseType_t prvTrackingLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString ) {
 	int8_t *pcParameter1;
@@ -65,15 +70,6 @@ int InitTracking() {
 	return 0;
 }
 
-//static uint32_t home_alt = 2580; // 258m
-
-
-
-#define fabs(x) x<0?-x:x
-
-#define EARTH_RADIUS 6371000
-
-
 static double deg2rad(double deg) {
     return ((deg*PI)/180);
 }
@@ -103,13 +99,16 @@ float calc_bearing(int32_t lon1, int32_t lat1, int32_t lon2, int32_t lat2) {
     return b;
 }
 
+double FastArcTan(double x){
+    return M_PI_4*x - x*(fabs(x) - 1)*(0.2447 + 0.0663*fabs(x));
+}
+
 float calc_elevation(int32_t alt) {
     float at = atan2(alt, home_dist);
     at = at * 57.2957795;
-    //int16_t e = (int16_t)round(at);
+
     return at;
 }
-
 
 void vAntennaTrackingTimerCallback(TimerHandle_t pxTimer) {
 	(void) pxTimer;
@@ -117,19 +116,14 @@ void vAntennaTrackingTimerCallback(TimerHandle_t pxTimer) {
 	if( /*gps.fix == MINMEA_GPGSA_FIX_2D &&*/  telemetry.status == TELEMETRY_OK ) {
 		calc_longitude_scaling(gps.lon);
 		Bearing = calc_bearing(gps.lon,gps.lat,telemetry.lon,telemetry.lat);
-		Elevation = calc_elevation(telemetry.alt - gps.alt);
-		//if(bearing >= home_bearing){
-		//	bearing -= home_bearing;
-		//} else {
-		//	bearing += 360 - home_bearing;
-		//}
+		//Elevation = calc_elevation(telemetry.alt - gps.alt); // USE gps alt
+		Elevation = calc_elevation(telemetry.alt); // thinking that current alt is zero.
 
 		if (tracking_log_enable ) {
 			INFO("Track to Bearing: %d Elevation: %d (home dist: %d)", Bearing, Elevation, home_dist);
 		}
 	}
 }
-
 
 void calc_longitude_scaling(int32_t lat) {
     float rads       = (abs((float)lat) / 10000000.0) * 0.0174532925;

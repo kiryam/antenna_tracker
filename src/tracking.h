@@ -12,6 +12,7 @@ extern "C" {
 
 	extern uint32_t home_dist;
 	extern float Elevation;
+	extern float ElevationTuning;
 	extern float Bearing;
 	extern float BearingTuning;
 	extern TimerHandle_t trackerTimer;

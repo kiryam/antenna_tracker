@@ -1,12 +1,15 @@
+#include "stepper_tuning.h"
+
 #include <stdio.h>
 
-#include "servo.h"
 #include "gui.h"
 #include "gfx.h"
 #include "main.h"
 
 #include "../tracking.h"
 #include "../stepper.h"
+#include "settings.h"
+
 
 static GWidgetInit wi;
 static GHandle ghServoBearingTuning;
@@ -14,38 +17,48 @@ static int16_t last_encoder_value;
 static GHandle ghContainerServoTuning;
 static GListener gl;
 static GSourceHandle upHandle;
-void ServoTuningRender();
+void StepperTuningRender();
 
 
-static void gwServoEvent(void *param, GEvent *pe) {
-	switch( ((GEventDial*)pe)->instance) {
-	case 0:
-		if ( ((GEventDial*)pe)->value != last_encoder_value ){
-			if (((GEventDial*)pe)->value > last_encoder_value) {
-				if( BearingTuning < 90 ){
-					BearingTuning = BearingTuning + STEPPER_MIN_ANGILE;
-				}
-			} else {
-				if (BearingTuning > -90 ) {
-					BearingTuning = BearingTuning - STEPPER_MIN_ANGILE;
-				}
+static void gwStepperTuningEvent(void *param, GEvent *pe) {
+	(void)param;
+	if ( pe->type == GEVENT_TOGGLE ){
+			switch( ((GEventToggle*)pe)->instance) {
+			case BUTTON_ESC:
+				ServoHandler();
+				break;
 			}
-			last_encoder_value = ((GEventDial*)pe)->value;
+		}else if( pe->type == GEVENT_DIAL) {
+			switch( ((GEventDial*)pe)->instance) {
+			case 0:
+				if ( ((GEventDial*)pe)->value != last_encoder_value ){
+					if (((GEventDial*)pe)->value > last_encoder_value) {
+						if( BearingTuning < 90 ){
+							BearingTuning = BearingTuning + STEPPER_MIN_ANGILE;
+						}
+					} else {
+						if (BearingTuning > -90 ) {
+							BearingTuning = BearingTuning - STEPPER_MIN_ANGILE;
+						}
+					}
+					last_encoder_value = ((GEventDial*)pe)->value;
+				}
+				break;
+			}
 		}
-		break;
-	}
 }
 
-void ServoTuningCreate(){
+void StepperTuningCreate(){
 	geventListenerInit(&gl);
 	upHandle = ginputGetDial(0);
 	geventAttachSource(&gl, upHandle, 0);
-	geventRegisterCallback(&gl, gwServoEvent, 0);
+
+	GSourceHandle upHandle = ginputGetToggle(BUTTON_ESC);
+	geventAttachSource(&gl, upHandle, GLISTEN_TOGGLE_ON);
+
+	geventRegisterCallback(&gl, gwStepperTuningEvent, 0);
 
 	gwinWidgetClearInit(&wi);
-	wi.customDraw = 0;
-	wi.customParam = 0;
-	wi.customStyle = 0;
 
 	wi.g.show = TRUE;
 	wi.g.width = 126;
@@ -65,7 +78,7 @@ void ServoTuningCreate(){
 	gwinLabelSetAttribute(ghServoBearingTuning, 60, "BTuning:");
 }
 
-void ServoTuningDestroy(){
+void StepperTuningDestroy(){
 	UIDestroyContainerWithChilds(ghContainerServoTuning);
 	ghContainerServoTuning = NULL;
 	//geventDetachSourceListeners(upHandle);
@@ -73,19 +86,19 @@ void ServoTuningDestroy(){
 	vSemaphoreDelete(gl.waitqueue);
 }
 
-Page* CreateServoTuningPage(){
+Page* CreateStepperTuningPage(){
 	Page* page = pvPortMalloc(sizeof(Page));
 	if( page == NULL ){
 		return NULL;
 	}
 	page->Page = PAGE_SERVO_TUNING;
-	page->Render = ServoTuningRender;
-	page->Create = ServoTuningCreate;
-	page->Destroy = ServoTuningDestroy;
+	page->Render = StepperTuningRender;
+	page->Create = StepperTuningCreate;
+	page->Destroy = StepperTuningDestroy;
 	return page;
 }
 
-void ServoTuningRender(){
+void StepperTuningRender(){
 	char tmp[32] ={0};
 	sprintf(tmp,"%f", BearingTuning);
 	gwinSetText(ghServoBearingTuning, tmp, TRUE);

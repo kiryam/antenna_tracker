@@ -35,6 +35,7 @@ extern "C" {
 	void switchPage(Page* page);
 	void UIDestroyContainerWithChilds(GHandle gh);
 	extern TimerHandle_t guiTimer;
+	extern Page* currentPage;
 #ifdef __cplusplus
 }
 #endif

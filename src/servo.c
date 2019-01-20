@@ -46,7 +46,7 @@ int ServoInit() {
     TIM_Cmd(TIM2, ENABLE);
 
 
-	servoTimer = xTimerCreate( "servoTimer", 100 ,pdTRUE,0, vServoTimerCallback);
+	servoTimer = xTimerCreate( "servoTimer", 200 ,pdTRUE,0, vServoTimerCallback);
 	if (servoTimer == NULL) {
 		ERROR("Failed to create servoTimer");
 		return 1;
@@ -63,17 +63,17 @@ int ServoInit() {
 
 void vServoTimerCallback(TimerHandle_t pxTimer){
 	( void ) pxTimer;
-	SetServoPosSmooth(Elevation,SERVO_SPEED_SLOW);
+	SetServoPosSmooth(Elevation+ElevationTuning,SERVO_SPEED_SLOW);
 }
 
 void ServoSetPos(float angile) {
-	if (settingsGetInt32(SERVO_ENABLED) == 0) return;
-
-	#if SERVO_FLIP == 0
-		TIM2->CCR1 = map(angile, SERVO_MIN_ANGILE, SERVO_MAX_ANGILE, SERVO_MIN_PULSE, SERVO_MAX_PULSE);
-	#else
-		TIM2->CCR1 = map(angile, SERVO_MAX_ANGILE, SERVO_MIN_ANGILE, SERVO_MIN_PULSE, SERVO_MAX_PULSE);
-	#endif
+	if (settingsGetInt32(SERVO_ENABLED) > 0 && angile <=SERVO_MAX_ANGILE && angile >= SERVO_MIN_ANGILE){
+		#if SERVO_FLIP == 0
+			TIM2->CCR1 = map(angile, SERVO_MIN_ANGILE, SERVO_MAX_ANGILE, SERVO_MIN_PULSE, SERVO_MAX_PULSE);
+		#else
+			TIM2->CCR1 = map(angile, SERVO_MAX_ANGILE, SERVO_MIN_ANGILE, SERVO_MIN_PULSE, SERVO_MAX_PULSE);
+		#endif
+	}
 	servoCurrentAnglie = angile;
 }
 

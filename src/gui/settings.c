@@ -6,12 +6,6 @@
 #include "main.h"
 #include "menu.h"
 
-static GListener gl;
-static GSourceHandle upHandle;
-static uint16_t last_encoder_value;
-static GHandle ghContainerSettings, ghList1;
-//MenuItem* _activeMenu;
-void (*_itemHandlers[MAX_MENU_ITEMS_COUNT])(void);
 
 const GWidgetStyle MyCustomStyle = {
 	Black,			// window background
@@ -41,6 +35,13 @@ const GWidgetStyle MyCustomStyle = {
 		White		// progress - active area
 	}
 };
+static GListener gl;
+static GSourceHandle upHandle,upHandle2;
+static uint16_t last_encoder_value;
+static GHandle ghContainerSettings, ghList1;
+//MenuItem* _activeMenu;
+void (*_itemHandlers[MAX_MENU_ITEMS_COUNT])(void);
+
 static void gwSettingsEvent(void *param, GEvent *pe){
 	if ( pe->type == GEVENT_TOGGLE ){
 		switch( ((GEventToggle*)pe)->instance) {
@@ -48,6 +49,11 @@ static void gwSettingsEvent(void *param, GEvent *pe){
 			_itemHandlers[gwinListGetSelected(ghList1)]();
 			break;
 		case BUTTON_ESC:
+			//if(currentPage->Page == PAGE_SETTINGS){
+			switchPage(CreateScreenPage());
+			//}else {
+			//	switchPage(CreateSettingsPage(NULL));
+			//}
 			break;
 		}
 	}else if( pe->type == GEVENT_DIAL) {
@@ -62,6 +68,10 @@ static void gwSettingsEvent(void *param, GEvent *pe){
 }
 
 // HANDLERS
+void StepperTuning(){
+	switchPage(CreateStepperTuningPage());
+}
+
 void StepperOff(){
 	settingsSetInt32(STEPPER_ENABLED, 0);
 	INFO("Stepper off");
@@ -72,6 +82,10 @@ void StepperOn(){
 	settingsSetInt32(STEPPER_ENABLED, 1);
 	INFO("Stepper on");
 	switchPage(CreateSettingsPage(NULL));
+}
+
+void ServoTuning(){
+	switchPage(CreateServoTuningPage());
 }
 
 void ServoOff(){
@@ -87,8 +101,9 @@ void ServoOn(){
 }
 
 void StepperHandler(){
-	MenuItem * m = MenuCreate(2);
+	MenuItem * m = MenuCreate(3);
 	if (m!= NULL){
+		MenuAddItem(m, "Stepper Tuning", StepperTuning);
 		MenuAddItem(m, "Stepper on", StepperOn);
 		MenuAddItem(m, "Stepper off", StepperOff);
 	}
@@ -97,8 +112,9 @@ void StepperHandler(){
 }
 
 void ServoHandler(){
-	MenuItem * m = MenuCreate(2);
+	MenuItem * m = MenuCreate(3);
 	if (m!= NULL){
+		MenuAddItem(m, "Servo Tuning", ServoTuning);
 		MenuAddItem(m, "Servo on", ServoOn);
 		MenuAddItem(m, "Servo off", ServoOff);
 	}
@@ -114,6 +130,9 @@ void SettingsCreate(Page* page){
 
 	upHandle = ginputGetToggle(BUTTON_ENTER);
 	geventAttachSource(&gl, upHandle, GLISTEN_TOGGLE_ON);
+
+	upHandle2 = ginputGetToggle(BUTTON_ESC);
+	geventAttachSource(&gl, upHandle2, GLISTEN_TOGGLE_ON);
 
 	GWidgetInit	wi;
 	gwinWidgetClearInit(&wi);
@@ -159,6 +178,9 @@ void SettingsDestroy(struct __Page* page){
 
 	geventDetachSourceListeners(upHandle);
 	geventDetachSource(&gl, upHandle);
+
+	geventDetachSourceListeners(upHandle2);
+	geventDetachSource(&gl, upHandle2);
 
 	vSemaphoreDelete(gl.waitqueue);
 

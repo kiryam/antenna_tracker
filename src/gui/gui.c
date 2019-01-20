@@ -9,14 +9,14 @@
 #include "../gps.h"
 #include "../tracking.h"
 #include "../stepper.h"
-#include "servo.h"
+#include "stepper_tuning.h"
 
 #define INTCACHE_SIZE 5
 
 static void vUIRenderTimerCallback(TimerHandle_t pxTimer);
 TimerHandle_t guiTimer = NULL;
 static GListener gl;
-static Page* currentPage;
+Page* currentPage;
 static bool pageCreated;
 int32_t intCache[INTCACHE_SIZE];
 
@@ -27,11 +27,11 @@ static void gwPageEvent(void *param, GEvent *pe) {
 		case BUTTON_ENTER:
 			break;
 		case BUTTON_ESC:
-			if(currentPage->Page == PAGE_SCREEN ) {
-				switchPage(CreateServoTuningPage());
-			}else if(currentPage->Page == PAGE_SERVO_TUNING || currentPage->Page == PAGE_SETTINGS) {
-				switchPage(CreateScreenPage());
-			}
+			//if(currentPage->Page == PAGE_SCREEN ) {
+			//	switchPage(CreateServoTuningPage());
+			//}else if(currentPage->Page == PAGE_SERVO_TUNING || currentPage->Page == PAGE_SETTINGS) {
+			//	switchPage(CreateScreenPage());
+			//}
 			break;
 		}
 	}

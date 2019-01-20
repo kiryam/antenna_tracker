@@ -126,6 +126,6 @@ void pointTo(float angile){
 	//taskEXIT_CRITICAL();
 
 	currentAngile = angile;
-	INFO("Stepper rotate: %f, current angile: %f", -1*diff*dir, currentAngile);
+	//INFO("Stepper rotate: %f, current angile: %f", -1*diff*dir, currentAngile);
 	TRACE_CHECKPOINT("POINT TO DONE");
 }

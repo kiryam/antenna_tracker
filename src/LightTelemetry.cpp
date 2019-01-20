@@ -95,8 +95,6 @@ void ltm_read() {
         if(LTMrcvChecksum == 0) {
         	telemetry.rx_good++;
         	telemetry.status = TELEMETRY_OK;
-        	//   lastpacketreceived = millis();
-        	//protocol = "LTM";
             ltm_check();
             c_state = IDLE;
         } else {                                                   // wrong checksum, drop packet
@@ -117,6 +115,7 @@ void ltm_check() {
 	  telemetry.lat = (int32_t)ltmread_u32();
 	  telemetry.lon = (int32_t)ltmread_u32();
 	  uint8_t uav_groundspeedms = ltmread_u8();
+
 	  telemetry.groundspeed_ms = (uint16_t) round((float)(uav_groundspeedms * 3.6f)); // convert to kmh
       telemetry.alt = (int32_t)ltmread_u32();
       uint8_t ltm_satsfix = ltmread_u8();

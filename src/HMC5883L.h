@@ -43,7 +43,7 @@ extern "C" {
 #define HMC5883L_I2C_SCL_Pin          GPIO_Pin_8
 #define HMC5883L_I2C_SDA_Pin          GPIO_Pin_9
 #define HMC5883L_I2C_RCC_Port         RCC_APB2Periph_GPIOB
-#define HMC5883L_I2C_Speed            200000
+#define HMC5883L_I2C_Speed            400000
 
 
 

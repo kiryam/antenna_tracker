@@ -8,7 +8,9 @@
 extern "C" {
 #endif
 
+
 	Page* CreateSettingsPage(MenuItem *_menu);
+	void StepperHandler();
 
 #ifdef __cplusplus
 }
