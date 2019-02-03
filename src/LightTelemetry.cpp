@@ -61,7 +61,8 @@ void ltm_read() {
   c_state = IDLE;
 
   uint16_t cRxedChar;
-  while( xQueueReceive( telemetryRxQueue, &( c ), ( TickType_t ) 10 ) ) {
+  while( xQueueReceive( telemetryRxQueue, &( c ), ( TickType_t ) 0) ) {
+	 // INFO("%d", c);
     if (c_state == IDLE) {
       c_state = (c=='$') ? HEADER_START1 : IDLE;
     } else if (c_state == HEADER_START1) {

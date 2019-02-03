@@ -13,7 +13,7 @@
 
 #define GPS_USART USART3
 #define GPS_USART_IRQ USART3_IRQn
-#define GPS_QUEUE_LEN 10
+#define GPS_QUEUE_LEN 64
 
 
 void vGPSTimerCallback(TimerHandle_t pxTimer);
@@ -114,7 +114,7 @@ int gpsInit(){
 
 	NVIC_EnableIRQ(GPS_USART_IRQ);
 
-	gpsTimer = xTimerCreate( "gpsTimer", 500 ,pdTRUE,0, vGPSTimerCallback);
+	gpsTimer = xTimerCreate( "gpsTimer", 1000 ,pdTRUE,0, vGPSTimerCallback);
 	if (gpsTimer == NULL) {
 		ERROR("Failed to create gpsTimer");
 		return 1;
@@ -148,7 +148,7 @@ void USART3_IRQHandler(){
 
 void vGPSTimerCallback(TimerHandle_t pxTimer) {
 	(void) pxTimer;
-	while( xQueueReceive( gpsRxQueue, &cRxedChar, ( TickType_t ) 10 ) ) {
+	while( xQueueReceive( gpsRxQueue, &cRxedChar, ( TickType_t ) 4 ) ) {
 		if (line_i == MINMEA_MAX_LENGTH ) { CLEAR_LINE(); }
 		line[line_i++] = cRxedChar;
 		if( cRxedChar == '\n' ) {

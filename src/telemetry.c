@@ -142,7 +142,7 @@ void vTelemetryTimerCallback(TimerHandle_t pxTimer) {
 	(void)pxTimer;
 
 	if (telemetryType == TELEMETRY_MAVLINK) {
-		while( xQueueReceive( telemetryRxQueue, &( cRxedChar ), ( TickType_t ) 1 ) ) {
+		while( xQueueReceive( telemetryRxQueue, &( cRxedChar ), ( TickType_t ) 0 ) ) {
 			msgReceived = mavlink_parse_char(MAVLINK_COMM_0, cRxedChar, &message, &status);
 
 			if ( (lastStatus.packet_rx_drop_count != status.packet_rx_drop_count) ) {

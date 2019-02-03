@@ -10,8 +10,10 @@
 #include "../tracking.h"
 #include "../stepper.h"
 #include "stepper_tuning.h"
+#include "../settings.h"
 
 #define INTCACHE_SIZE 5
+#define FLOATCACHE_SIZE 3
 
 static void vUIRenderTimerCallback(TimerHandle_t pxTimer);
 TimerHandle_t guiTimer = NULL;
@@ -19,6 +21,7 @@ static GListener gl;
 Page* currentPage;
 static bool pageCreated;
 int32_t intCache[INTCACHE_SIZE];
+float floatCache[FLOATCACHE_SIZE];
 
 
 static void gwPageEvent(void *param, GEvent *pe) {
@@ -51,7 +54,7 @@ void UIInitTask(void* pvParameters) {
 
 	switchPage(CreateScreenPage());
 
- 	guiTimer = xTimerCreate( "guiTimer", 1000, pdTRUE,0, vUIRenderTimerCallback);
+ 	guiTimer = xTimerCreate( "guiTimer", settingsGetInt32(GUI_REFRESH_INTERVAL), pdTRUE,0, vUIRenderTimerCallback);
 	if (guiTimer == NULL) {
 		ERROR("Failed to create guiTimer");
 	}
@@ -132,6 +135,18 @@ void lat_to_char( int32_t degE7, char* buf ){
   while(tmp[i] != '\0' ){
 	  buf[pos++] = tmp[i++];
 	}
+}
+
+
+void gwinSetFloatCached(uint16_t cache_bank, GHandle gh, float value, bool_t useAlloc){
+	if (floatCache[cache_bank] == value ){
+		return;
+	}
+	floatCache[cache_bank] = value;
+	char tmp[32] ={0};
+	//itoa(value, tmp, 10);
+	sprintf(tmp, "%0.4f", value);
+	gwinSetText(gh, tmp, useAlloc);
 }
 
 void gwinSetIntCached(uint16_t cache_bank, GHandle gh, int32_t value, bool_t useAlloc){

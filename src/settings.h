@@ -16,6 +16,7 @@ typedef enum {
 	TELEMETRY_FAKE_ALT,
 	STEPPER_ENABLED,
 	SERVO_ENABLED,
+	GUI_REFRESH_INTERVAL,
 
 	UNKNOWN, // should be pre last
 	SETTING_COUNT // should be last
@@ -33,6 +34,7 @@ static int32_t SETTING_DEF[SETTING_COUNT-1] = {
 	1000*10,
 	1,
 	1,
+	1000
 };
 
 static char* SETTING_STR[SETTING_COUNT-1] = {
@@ -47,6 +49,7 @@ static char* SETTING_STR[SETTING_COUNT-1] = {
 	"telemetry_fake_alt",
 	"stepper_enabled",
 	"servo_enabled",
+	"gui_refresh_interval"
 };
 
 

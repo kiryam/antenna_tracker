@@ -32,6 +32,7 @@ extern "C" {
 
 	void UIInitTask(void* pvParameters);
 	void UIRenderTask(void * argunment);
+	void gwinSetFloatCached(uint16_t cache_bank, GHandle gh, float value, bool_t useAlloc);
 	void switchPage(Page* page);
 	void UIDestroyContainerWithChilds(GHandle gh);
 	extern TimerHandle_t guiTimer;

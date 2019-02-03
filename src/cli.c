@@ -59,7 +59,7 @@ void vCLITimerCallback(TimerHandle_t pxTimer) {
 	(void) pxTimer;
 	uint16_t cInputIndex = 0;
 	BaseType_t xMoreDataToFollow;
-	while( xQueueReceive( serialRxQueue, &( cRxedChar ), ( TickType_t ) 10 ) ) {
+	while( xQueueReceive( serialRxQueue, &( cRxedChar ), ( TickType_t ) 0 ) ) {
 		if( cRxedChar == '\n' ) {
 			serialSendStr("\r\n");
 			do {

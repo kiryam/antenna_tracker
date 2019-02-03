@@ -8,7 +8,7 @@
 #include "../tracking.h"
 
 static GWidgetInit wi;
-static GHandle ghContainerTelemetry, ghTelemetryRxGood, ghTelemetryRxBad, ghTelemetryPosLat, ghTelemetryPosLon;
+static GHandle ghContainerTelemetry, ghTelemetryRxGood, ghTelemetryRxBad, ghTelemetryPosLat, ghTelemetryPosLon, ghTelemetryPosAlt;
 static GHandle ghContainerGPS, ghGPSLon, ghGPSLat, ghGPSAlt, ghHomeBearing, ghGPSSats;
 static GHandle ghContainerSystem, ghSystemHeapFree;
 static GHandle ghContainerServo, ghServoBearing, ghServoElevation, ghServoDist;
@@ -66,6 +66,8 @@ void ScreenRender(){
 		gwinSetIntCached(1, ghTelemetryRxBad, telemetry.rx_bad, TRUE);
 		gwinSetDegE7Cached(2, ghTelemetryPosLat, telemetry.lat, TRUE);
 		gwinSetDegE7Cached(3, ghTelemetryPosLon, telemetry.lon, TRUE);
+ 		gwinSetFloatCached(0, ghTelemetryPosAlt, (float)telemetry.alt / (float)100, TRUE);
+
 	} else if (active_screen == SCREEN_SYSTEM ){
 		gwinSetIntCached(0, ghSystemHeapFree, xPortGetFreeHeapSize(), TRUE);
 	} else if (active_screen == SCREEN_GPS ){
@@ -75,9 +77,9 @@ void ScreenRender(){
 		gwinSetIntCached(3, ghGPSSats, gps.sats, TRUE);
 		gwinSetIntCached(4, ghHomeBearing, home_bearing, TRUE);
 	} else if (active_screen == SCREEN_SERVO) {
-		gwinSetIntCached(0, ghServoBearing, Bearing, TRUE);
-		gwinSetIntCached(1, ghServoElevation, Elevation, TRUE);
-		gwinSetIntCached(2, ghServoDist, home_dist, TRUE);
+		gwinSetFloatCached(0, ghServoBearing, Bearing, TRUE);
+		gwinSetFloatCached(1, ghServoElevation, Elevation, TRUE);
+		gwinSetIntCached(0, ghServoDist, home_dist/100, TRUE);
 	}
 }
 
@@ -122,6 +124,13 @@ void UITelemetryScreen(){
 	wi.text = "0";
 	ghTelemetryPosLon = gwinLabelCreate(NULL, &wi);
 	gwinLabelSetAttribute(ghTelemetryPosLon, 40, "Lon:");
+
+	wi.g.y = 48;
+	wi.g.x = 0;
+	wi.g.height = 12;
+	wi.text = "0";
+	ghTelemetryPosAlt = gwinLabelCreate(NULL, &wi);
+	gwinLabelSetAttribute(ghTelemetryPosAlt, 40, "Alt:");
 }
 
 void UISystemInfoScreen(){

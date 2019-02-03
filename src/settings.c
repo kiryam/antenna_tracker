@@ -23,7 +23,7 @@ static BaseType_t prvSettingsSetCommand( int8_t *pcWriteBuffer, size_t xWriteBuf
 	int8_t *pcParameter1, *pcParameter2;
 	BaseType_t xParameter1Length,xParameter2Length;
 	pcParameter1 = FreeRTOS_CLIGetParameter ( pcCommandString, 1, &xParameter1Length);
-	char settingStr[16]= {0x00};
+	char settingStr[32]= {0x00};
 	strncpy(settingStr, pcParameter1, xParameter1Length);
 
 	pcParameter2 = FreeRTOS_CLIGetParameter ( pcCommandString, 2, &xParameter2Length);
